@@ -4,16 +4,18 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <time.h>
 #include <pthread.h>
 #include <signal.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 65536 //tamanho teórico máximo IP/TCP
 
-int sockfd;
-pthread_mutex_t output_mutex = PTHREAD_MUTEX_INITIALIZER;
+//parametros globais de conexao e tempo (somente leitura pelas threads)
+struct sockaddr_in server_addr;
+int duration;
 
 int send_all(int fd, const char *data, size_t len) {
     size_t sent = 0;
@@ -37,73 +39,73 @@ int send_all(int fd, const char *data, size_t len) {
     return 0;
 }
 
-void *receive_messages(void *arg) {
+void *client_thread(void *arg) {
+    int id = *(int *)arg;
+    char name[32];
     char buffer[BUFFER_SIZE];
-    size_t pos = 0;
 
-    (void)arg;
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        perror("socket");
+        return NULL;
+    }
 
-    while (1) {
-        char c;
-        ssize_t n = recv(sockfd, &c, 1, 0);
+    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("connect");
+        close(sockfd);
+        return NULL;
+    }
 
-        if (n == 0) {
-            pthread_mutex_lock(&output_mutex);
-            printf("\nConexao encerrada pelo servidor.\n");
-            fflush(stdout);
-            pthread_mutex_unlock(&output_mutex);
-            break;
-        }
+    //envio do identificador para registro da sessao no servidor
+    snprintf(name, sizeof(name), "cliente_%d\n", id);
+    if (send_all(sockfd, name, strlen(name)) == -1) {
+        perror("send");
+        close(sockfd);
+        return NULL;
+    }
+
+    //inicializa o payload fora do laço para evitar overhead de CPU */
+    memset(buffer, 'A', sizeof(buffer));
+
+    time_t start = time(NULL);
+
+    //transmissao continua de blocos brutos durante a janela de teste */
+    while (time(NULL) - start < duration) {
+        //envio direto de blocos, sem o laço do send_all() e sem checagem de "/quit"
+        ssize_t n = send(sockfd, buffer, sizeof(buffer), MSG_NOSIGNAL); 
+
 
         if (n == -1) {
             if (errno == EINTR)
                 continue;
-
-            pthread_mutex_lock(&output_mutex);
-            perror("recv");
-            pthread_mutex_unlock(&output_mutex);
+            perror("send");
             break;
         }
 
-        if (c == '\n') {
-            buffer[pos] = '\0';
-
-            pthread_mutex_lock(&output_mutex);
-            printf("\r%s\n", buffer);
-            fflush(stdout);
-            pthread_mutex_unlock(&output_mutex);
-
-            pos = 0;
-        } else if (c != '\r') {
-            if (pos < sizeof(buffer) - 1)
-                buffer[pos++] = c;
-        }
+        if (n == 0)
+            break;
     }
 
+    close(sockfd);
     return NULL;
 }
 
 int main(int argc, char *argv[]) {
-    struct sockaddr_in server_addr;
-    char name[32];
-    char buffer[BUFFER_SIZE];
-    pthread_t receiver;
-
-    if (argc != 3) {
-        fprintf(stderr, "Uso: %s <IP> <porta>\n", argv[0]);
+    if (argc != 5) {
+        fprintf(stderr, "Uso: %s <IP> <porta> <duracao_seg> <num_clientes>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
     int port = atoi(argv[2]);
+    duration = atoi(argv[3]);
+    int num_clients = atoi(argv[4]);
 
-    signal(SIGPIPE, SIG_IGN);
-
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-
-    if (sockfd == -1) {
-        perror("socket");
+    if (duration <= 0 || num_clients <= 0) {
+        fprintf(stderr, "Duracao e numero de clientes devem ser maiores que zero segundos.\n");
         return EXIT_FAILURE;
     }
+
+    signal(SIGPIPE, SIG_IGN);
 
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -112,87 +114,23 @@ int main(int argc, char *argv[]) {
     if (inet_pton(AF_INET, argv[1],
                   &server_addr.sin_addr) != 1) {
         fprintf(stderr, "Endereco IPv4 invalido.\n");
-        close(sockfd);
         return EXIT_FAILURE;
     }
 
-    if (connect(sockfd, (struct sockaddr *)&server_addr,
-                sizeof(server_addr)) == -1) {
-        perror("connect");
-        close(sockfd);
-        return EXIT_FAILURE;
-    }
+    pthread_t threads[num_clients];
+    int ids[num_clients];
 
-    printf("Seu nome: ");
-
-    if (fgets(name, sizeof(name), stdin) == NULL) {
-        close(sockfd);
-        return EXIT_FAILURE;
-    }
-
-    name[strcspn(name, "\r\n")] = '\0';
-
-    if (name[0] == '\0' ||
-        strchr(name, '\n') != NULL) {
-        fprintf(stderr, "Nome invalido.\n");
-        close(sockfd);
-        return EXIT_FAILURE;
-    }
-
-    if (send_all(sockfd, name, strlen(name)) == -1 ||
-        send_all(sockfd, "\n", 1) == -1) {
-        perror("send");
-        close(sockfd);
-        return EXIT_FAILURE;
-    }
-
-    if (pthread_create(&receiver, NULL,
-                       receive_messages, NULL) != 0) {
-        fprintf(stderr, "Erro ao criar thread receptora.\n");
-        close(sockfd);
-        return EXIT_FAILURE;
-    }
-
-    printf("Conectado! Digite /quit para sair.\n");
-
-    while (1) {
-        pthread_mutex_lock(&output_mutex);
-        printf("> ");
-        fflush(stdout);
-        pthread_mutex_unlock(&output_mutex);
-
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL)
-            break;
-
-        if (strcmp(buffer, "/quit\n") == 0 ||
-            strcmp(buffer, "/quit") == 0) {
-            send_all(sockfd, "/quit\n", 6);
-            break;
-        }
-
-        size_t len = strlen(buffer);
-
-        if (len > 0 && buffer[len - 1] != '\n') {
-            int c;
-            while ((c = getchar()) != '\n' && c != EOF)
-                ;
-            fprintf(stderr, "Mensagem muito longa.\n");
-            continue;
-        }
-
-        if (send_all(sockfd, buffer, len) == -1) {
-            perror("send");
-            break;
+    for (int i = 0; i < num_clients; i++) {
+        ids[i] = i + 1;
+        if (pthread_create(&threads[i], NULL, client_thread, &ids[i]) != 0) {
+            fprintf(stderr, "Erro ao criar thread do cliente %d.\n", ids[i]);
+            return EXIT_FAILURE;
         }
     }
 
-    shutdown(sockfd, SHUT_RDWR);
-    pthread_join(receiver, NULL);
-    close(sockfd);
-
-    pthread_mutex_destroy(&output_mutex);
-
-    printf("Cliente encerrado.\n");
+    for (int i = 0; i < num_clients; i++) {
+        pthread_join(threads[i], NULL);
+    }
 
     return EXIT_SUCCESS;
 }
