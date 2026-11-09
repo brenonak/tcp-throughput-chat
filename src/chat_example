@@ -1,7 +1,5 @@
-gcc -Wall -Wextra -g chat_server.c -o chat_server -pthread
-gcc -Wall -Wextra -g chat_client.c -o chat_client -pthread
+gcc -Wall -Wextra -O2 -pthread chat_server.c -o chat_server
+gcc -Wall -Wextra -O2 -pthread chat_client.c -o chat_client
 
-./chat_server 5000
-
-./chat_client 127.0.0.1 5000
-
+./chat_server -p 5000 -n 5 -d 30 -l lan -r 1
+./chat_client 127.0.0.1 5000 30 5
