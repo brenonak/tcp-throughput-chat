@@ -1,92 +1,102 @@
 # Chat TCP Throughput
 
-Medição da taxa de transmissão agregada de um servidor TCP com 1 a 10
-clientes simultâneos, a partir de uma aplicação de chat multithread.
+Experimentos de vazao agregada recebida por um servidor TCP com 1 a 10 conexoes simultaneas. Cada conexao corresponde a uma thread do programa cliente. Nao sao necessarios dez computadores.
 
-## Estrutura do repositório
+## Preparacao no Ubuntu ou WSL
 
-```
-tcp-throughput-chat/
-├── original/           # Chat TCP original fornecido pelo professor,
-│   ├── chat_server.c   # mantido sem modificação como ponto de partida
-│   ├── chat_client.c
-│   └── chat_example
-├── src/                # Versão instrumentada para medir vazão
-│   ├── chat_server.c
-│   ├── chat_client.c
-│   └── chat_example
-├── docs/               # Relatório em LaTeX (template SBC)
-│   ├── sbc-template.tex
-│   ├── sbc-template.pdf
-│   └── figs/
-└── README.md
-```
-
-## Compilação
-
-A partir de `src/`:
+Execute os comandos Linux no terminal Ubuntu, na raiz deste repositorio:
 
 ```bash
-gcc -Wall -Wextra -O2 -pthread chat_server.c -o chat_server
-gcc -Wall -Wextra -O2 -pthread chat_client.c -o chat_client
+sudo apt update
+sudo apt install build-essential python3-venv iproute2 ethtool
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+make
+make test
 ```
 
-Requer Linux com `glibc` e suporte a `pthread`. Testado com `gcc` 11+.
+Os binarios ficam em `build/`. Flags: `-O2 -Wall -Wextra -pthread`. Os fontes originais permanecem em `original/`. A analise precisa das bibliotecas Python; compilacao, execucao e validacao dos CSVs usam apenas ferramentas do sistema e a biblioteca padrao Python.
 
-## Execução
-
-### Servidor
+## Piloto e campanha em loopback
 
 ```bash
-./chat_server -p <porta> -n <N> -d <duracao_s> [opcoes]
+bash scripts/run_experiments.sh loopback --clients 1,10 --repetitions 1 --duration 15 --warmup 2 --cooldown 2 --output results/piloto
+bash scripts/run_experiments.sh loopback --clients 1,2,3,4,5,6,7,8,9,10 --repetitions 2 --duration 15 --warmup 2 --cooldown 2 --output results/campanha_curta
+bash scripts/run_experiments.sh loopback --output results/loopback_completo
 ```
 
-O servidor espera exatamente `N` conexões TCP antes de começar a medir. A
-rodada termina quando todos os clientes fecham a conexão (FIN detectado
-via `recv == 0`).
+Padrao: N de 1 a 10 em ordem crescente, dez repeticoes por N, 30 segundos, bloco fixo de 65.536 bytes, descartes de cinco segundos no inicio e no fim e intervalo de cinco segundos entre rodadas. Aproximadamente uma hora por campanha. Os parametros podem ser consultados com `bash scripts/run_experiments.sh --help`. O diretorio de saida deve ser novo.
 
-**Opções:**
+## Dois computadores na rede local
 
-| Flag | Padrão | Descrição |
-|------|--------|-----------|
-| `-p <porta>` | — | Porta TCP (obrigatória) |
-| `-n <N>` | — | Número de clientes esperados (obrigatório, 1–64) |
-| `-d <s>` | — | Duração da rodada em segundos (obrigatória) |
-| `-o <arquivo>` | `results.csv` | CSV de resumo (append) |
-| `-s <arquivo>` | `samples.csv` | CSV de amostras por segundo (append) |
-| `-r <id>` | `0` | Identificador da repetição |
-| `-b <bytes>` | `65536` | Tamanho do bloco combinado com o cliente (só registro) |
-| `-w <s>` | `5` | Segundos de warmup descartados da janela estável |
-| `-c <s>` | `5` | Segundos de cooldown descartados da janela estável |
-| `-l <label>` | `""` | Rótulo da campanha (`loopback`, `lan`, …) |
-| `-q` | — | Modo silencioso (nada no stdout) |
+Use a mesma revisao do repositorio nas duas maquinas, com as dependencias instaladas. Computador A executa o servidor; computador B executa todas as conexoes clientes. Os programas C continuam usando a mesma interface em loopback e LAN.
 
-Exemplo:
+Identifique o IPv4 acessivel do servidor com `ip -4 addr` e a interface com `ip route`. Exemplo: IP 192.168.1.20, interface eth0. Os computadores precisam conseguir se comunicar pela porta TCP 5000. Se houver firewall ativo, configure a liberacao dessa porta para a rede utilizada.
+
+No WSL, o endereco interno pode nao ser acessivel por outra maquina. Valide a conectividade antes da campanha e ajuste a rede do Windows/WSL quando necessario. Uma alternativa e usar Linux nativo para o servidor. Redes Wi-Fi com isolamento entre clientes tambem podem impedir a comunicacao.
+
+No computador A:
 
 ```bash
-./chat_server -p 5000 -n 5 -d 30 -l lan -r 1
+bash scripts/run_experiments.sh server --ip 192.168.1.20 --label lan_cabo --interface eth0 --output results/cabo
 ```
 
-### Cliente
+A cada rodada pronta, o executor mostra um comando para executar no computador B, na raiz do repositorio. Por exemplo:
 
 ```bash
-./chat_client <IP_servidor> <porta> <duracao_s> <num_clientes>
+bash scripts/run_experiments.sh client --ip 192.168.1.20 --port 5000 --duration 30 --clients 5 --rep 1 --label lan_cabo
 ```
 
-O cliente cria `num_clientes` threads internas, cada uma estabelecendo
-sua própria conexão TCP com o servidor e transmitindo blocos de 64 KiB
-preenchidos com `'A'` durante `duracao_s` segundos.
-
-Exemplo:
+Execute somente o comando da rodada atual e espere o servidor indicar a proxima. O modo cliente compila seu binario, coleta seu ambiente e salva um log em um novo diretorio. Para coletar informacoes da interface uma unica vez:
 
 ```bash
-./chat_client 127.0.0.1 5000 30 5
+bash scripts/coleta_ambiente.sh results/ambiente_cliente eth0
 ```
 
-### Ordem de execução
+Copie essa pasta para `results/cabo/ambiente/cliente` no servidor. Preencha `notas.txt` com cabo, switch/roteador, velocidade ou condicoes de Wi-Fi e outras cargas nas maquinas. Para Wi-Fi, use `--label lan_wifi` e outro diretorio. Mantenha o tipo de conexao fixo durante a campanha. SSH nao e necessario.
 
-1. Sobe o servidor primeiro — ele bloqueia esperando as `N` conexões.
-2. Dispara o cliente apontando para o IP do servidor, com o mesmo `N` e
-   a mesma duração.
-3. O servidor marca `t0` quando todos os clientes terminam de enviar o
-   nome, mede, e grava uma linha em `results.csv` quando a rodada acaba.
+## Protocolo e medicao
+
+1. Cada thread cliente conecta, envia um nome terminado em nova linha e espera `GO\n`.
+2. O servidor espera todos os N nomes completos, marca t0 com CLOCK_MONOTONIC, prepara a amostradora e libera a recepcao.
+3. O servidor envia `GO\n` a todas as conexoes. Cada cliente inicia seu cronometro monotonic e transmite continuamente.
+4. Ao terminar o intervalo, os clientes fecham as conexoes. O servidor espera o fim de todas, calcula a vazao e salva os CSVs.
+
+Atualize cliente e servidor juntos. As versoes antigas sem GO sao incompativeis. Nao e necessario sincronizar os relogios das maquinas. GO coordena a partida, mas nao chega exatamente ao mesmo tempo a todas as conexoes. O descarte inicial reduz esse efeito.
+
+O servidor conta apenas carga util recebida, excluindo nomes e controle. A formula principal e:
+
+`Mbps = 8 * bytes_window / (window_s * 1.000.000)`
+
+As amostras sao cumulativas por segundo. A janela usa a diferenca entre o contador no fim e no inicio dos descartes. Sua duracao efetiva esta em `window_s`; nao se presume exatamente 20 segundos. A amostragem depende do escalonamento do sistema. Um send bloqueado pode ultrapassar a duracao solicitada; o executor aplica um prazo externo.
+
+## Saidas e falhas
+
+Cada campanha guarda configuracao, ambiente, ordem implicita das rodadas por N e repeticao, comandos do servidor, logs e CSVs brutos por rodada. `manifest.csv` registra todas as tentativas e os motivos de falha. Apenas rodadas validadas entram nos CSVs consolidados. `duration_s` no resumo e o tempo efetivamente medido pelo servidor; a duracao solicitada esta em config.json.
+
+O executor espera ate 60 segundos pelos clientes e, apos START, ate duracao + 30 segundos pela conclusao. No loopback nao abre conexao de sondagem. Para na primeira falha e preserva os dados. Ctrl+C encerra somente os processos locais que criou. Na LAN, interrompa tambem o comando no outro computador se necessario. Uma nova execucao cria outra campanha.
+
+A coleta apenas consulta o sistema. Comandos ausentes ou sem permissao ficam registrados. O cliente nao informa os bytes enviados; por isso a validacao verifica os dados recebidos, sem comprovar igualdade entre envio e recepcao nem identificar toda desconexao individual antecipada.
+
+## Analise
+
+Com o ambiente Python ativado:
+
+```bash
+python3 scripts/analyze.py results/loopback_completo --output results/loopback_completo/analise
+python3 scripts/analyze.py results/loopback_completo results/cabo --output results/comparacao
+```
+
+O diretorio de analise deve estar vazio ou nao existir. Campanhas com duracoes, blocos ou descartes diferentes sao rejeitadas. Cada campanha permanece identificada, mesmo quando usa o mesmo tipo de rede.
+
+Saidas:
+
+- `summary.csv`: quantidade valida, maximo, media, desvio padrao amostral e IC 95% pela distribuicao t.
+- `rounds.csv` e `per_client.csv`: valores usados nos graficos, em Mbps decimais.
+- `throughput_max`, `throughput_mean` e `per_client`: graficos em PNG e PDF.
+- `warnings.txt`: falhas, cenarios ausentes e repeticoes insuficientes.
+
+O grafico obrigatorio e throughput_max: numero de clientes versus maior vazao agregada observada entre as repeticoes validas. Esse maximo nao representa capacidade teorica. A media usa IC de 95%; uma unica repeticao nao fornece desvio ou IC. Valores extremos nao sao removidos e cenarios ausentes nao recebem zero.
+
+A analise revalida os CSVs de cada rodada a partir do manifesto e das amostras originais. Use esses arquivos para discutir variacao, saturacao e limites de CPU, memoria e rede. A redacao do relatorio, iperf3, SSH, varredura de blocos e contagem de envio ficam fora desta versao.
