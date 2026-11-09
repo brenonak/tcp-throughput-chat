@@ -62,21 +62,11 @@ static void logmsg(const char *fmt, ...) {
 
 /* I/O utilitarios                                                     */
 
-/* Envia todos os bytes, lidando com envios parciais e EINTR. */
-static int send_all(int fd, const char *data, size_t len) {
-    size_t sent = 0;
-    while (sent < len) {
-        ssize_t n = send(fd, data + sent, len - sent, MSG_NOSIGNAL);
-        if (n == -1) {
-            if (errno == EINTR) continue;
-            return -1;
-        }
-        if (n == 0) return -1;
-        sent += (size_t)n;
-    }
-    return 0;
-}
-
+/*
+ * Le uma linha terminada por '\n', byte a byte.
+ * Esta funcao so eh usada UMA vez por cliente, para ler o nome inicial.
+ * NAO entra no caminho critico de medicao.
+ */
 static ssize_t read_line(int fd, char *buffer, size_t capacity) {
     size_t pos = 0;
     while (pos < capacity - 1) {
@@ -94,6 +84,7 @@ static ssize_t read_line(int fd, char *buffer, size_t capacity) {
     return (ssize_t)pos;
 }
 
+/* Diferenca em segundos entre dois clocks monotonic. */
 static double tdiff(const struct timespec *a, const struct timespec *b) {
     return (double)(b->tv_sec - a->tv_sec)
          + (double)(b->tv_nsec - a->tv_nsec) / 1e9;
@@ -106,6 +97,7 @@ static void *handle_client(void *arg) {
     char name_buf[NAME_MAX_LEN];
 
     /*
+     * Buffer de recepcao alocado no heap para evitar 64 KiB na stack.
      * Cada thread tem seu proprio buffer, sem compartilhamento.
      */
     char *buf = malloc(RECV_BUFFER_SIZE);
@@ -115,7 +107,7 @@ static void *handle_client(void *arg) {
         return NULL;
     }
 
-    /* le o nome do cliente. */
+    /* Fase 1: le o nome do cliente. */
     ssize_t n = read_line(c->fd, name_buf, sizeof(name_buf));
     if (n <= 0 || name_buf[0] == '\0') {
         logmsg("[server] cliente fechou antes de enviar o nome\n");
@@ -135,11 +127,11 @@ static void *handle_client(void *arg) {
     logmsg("[server] cliente %d/%d registrado: %s\n",
            c->index + 1, g_n_expected, c->name);
 
-    /* barreira de sincronizacao com main e as outras threads. */
+    /* Fase 2: barreira de sincronizacao com main e as outras threads. */
     pthread_barrier_wait(&g_start_barrier);
 
     /*
-     * laco de recepcao. Caminho critico.
+     * Fase 3: laco de recepcao. Caminho critico.
      *
      * - Buffer grande (64 KiB): uma syscall recv() por bloco, nao por byte.
      * - Nenhum mutex: contador atomico, nada mais.
@@ -278,7 +270,7 @@ static void write_samples(void) {
     fclose(f);
 }
 
-/* CALCULO DOS RESULTADOS                                              */
+/* Calculo dos resultados                                              */
 
 /*
  * Vazao agregada:
@@ -365,6 +357,7 @@ static void compute_and_report(const struct timespec *t_end) {
     write_samples();
 }
 
+/* main                                                                */
 
 static void usage(const char *prog) {
     fprintf(stderr,
@@ -482,38 +475,33 @@ int main(int argc, char *argv[]) {
 
     logmsg("[server] todas as conexoes aceitas, aguardando nomes...\n");
 
-    /* Espera as N threads chegarem na barreira (todas leram o nome). */
-    pthread_barrier_wait(&g_start_barrier);
-
-    logmsg("[server] enviando GO para os %d clientes...\n",
-           g_num_registered);
-
     /*
-     * Envia GO para todos. Depois marca t0.
-     * Ordem: GO -> t0 -> threads comecam a receber.
-     * Como as threads ja passaram pela barreira, elas estao bloqueadas
-     * em recv(), esperando os primeiros bytes. Os clientes so enviarao
-     * depois de receber GO. Entao t0 marcado logo apos enviar GOs eh
-     * uma aproximacao razoavel do inicio real da transmissao.
+     * Espera as N threads chegarem na barreira (todas leram o nome e
+     * entraram no laco de recv). Depois marca t0.
+     *
+     * Protocolo simplificado (sem handshake "GO\n"): o cliente comeca a
+     * transmitir imediatamente depois de enviar o nome. Pode acontecer
+     * de um cliente (que conectou primeiro) ja ter bytes enfileirados no
+     * buffer do kernel antes de t0. Esses bytes serao contados no laco
+     * de recv() apos t0, o que superestima levemente o "mbps_total".
+     *
+     * Isso nao afeta o "mbps_window", que usa a diferenca entre amostras
+     * cumulativas tomadas em t=warmup e t=duracao-cooldown. Com warmup
+     * de 5 s, qualquer skew inicial eh absorvido.
      */
-    for (int i = 0; i < g_num_registered; i++) {
-        if (send_all(g_clients[i]->fd, "GO\n", 3) == -1) {
-            fprintf(stderr, "[server] falha ao enviar GO para %s\n",
-                    g_clients[i]->name);
-        }
-    }
+    pthread_barrier_wait(&g_start_barrier);
 
     clock_gettime(CLOCK_MONOTONIC, &g_t_start);
     g_measurement_active = 1;
+
+    logmsg("[server] todos os clientes prontos, medicao iniciada "
+           "(duracao combinada: %d s).\n", g_duration_s);
 
     /* Dispara amostradora. */
     pthread_t sampler_tid;
     if (pthread_create(&sampler_tid, NULL, sampler, NULL) != 0) {
         fprintf(stderr, "[server] pthread_create sampler falhou\n");
     }
-
-    logmsg("[server] medicao iniciada (duracao combinada: %d s).\n",
-           g_duration_s);
 
     /* Espera todas as threads de cliente terminarem. */
     for (int i = 0; i < g_num_registered; i++) {
