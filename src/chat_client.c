@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +17,15 @@
 //parametros globais de conexao e tempo (somente leitura pelas threads)
 struct sockaddr_in server_addr;
 int duration;
+static int failed;
+static pthread_mutex_t failure_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static void fail(void) {
+    pthread_mutex_lock(&failure_mutex);
+    failed = 1;
+    pthread_mutex_unlock(&failure_mutex);
+}
+
 
 int send_all(int fd, const char *data, size_t len) {
     size_t sent = 0;
@@ -47,12 +57,14 @@ void *client_thread(void *arg) {
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
         perror("socket");
+        fail();
         return NULL;
     }
 
     if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
         perror("connect");
         close(sockfd);
+        fail();
         return NULL;
     }
 
@@ -61,16 +73,34 @@ void *client_thread(void *arg) {
     if (send_all(sockfd, name, strlen(name)) == -1) {
         perror("send");
         close(sockfd);
+        fail();
         return NULL;
     }
 
     //inicializa o payload fora do laço para evitar overhead de CPU */
     memset(buffer, 'A', sizeof(buffer));
 
-    time_t start = time(NULL);
+    char go[3];
+    size_t received = 0;
+    while (received < sizeof(go)) {
+        ssize_t n = recv(sockfd, go + received, sizeof(go) - received, 0);
+        if (n < 0 && errno == EINTR) continue;
+        if (n <= 0) { fail(); close(sockfd); return NULL; }
+        received += (size_t)n;
+    }
+    if (memcmp(go, "GO\n", sizeof(go)) != 0) {
+        fprintf(stderr, "Mensagem de inicio invalida.\n");
+        fail(); close(sockfd); return NULL;
+    }
+    struct timespec start, now;
+    clock_gettime(CLOCK_MONOTONIC, &start);
 
     //transmissao continua de blocos brutos durante a janela de teste */
-    while (time(NULL) - start < duration) {
+    while (1) {
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        double elapsed = (double)(now.tv_sec - start.tv_sec)
+                       + (double)(now.tv_nsec - start.tv_nsec) / 1e9;
+        if (elapsed >= duration) break;
         //envio direto de blocos, sem o laço do send_all() e sem checagem de "/quit"
         ssize_t n = send(sockfd, buffer, sizeof(buffer), MSG_NOSIGNAL); 
 
@@ -79,11 +109,14 @@ void *client_thread(void *arg) {
             if (errno == EINTR)
                 continue;
             perror("send");
+            fail();
             break;
         }
 
-        if (n == 0)
+        if (n == 0) {
+            fail();
             break;
+        }
     }
 
     close(sockfd);
@@ -100,7 +133,7 @@ int main(int argc, char *argv[]) {
     duration = atoi(argv[3]);
     int num_clients = atoi(argv[4]);
 
-    if (duration <= 0 || num_clients <= 0) {
+    if (port <= 0 || port > 65535 || duration <= 0 || num_clients <= 0 || num_clients > 64) {
         fprintf(stderr, "Duracao e numero de clientes devem ser maiores que zero segundos.\n");
         return EXIT_FAILURE;
     }
@@ -132,5 +165,5 @@ int main(int argc, char *argv[]) {
         pthread_join(threads[i], NULL);
     }
 
-    return EXIT_SUCCESS;
+    return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }
