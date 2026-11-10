@@ -224,6 +224,17 @@ class RunnerTests(unittest.TestCase):
                 self.assertTrue(rows)
                 self.assertTrue(all(r['server_machine_id'] == r['client_machine_id'] == 'pc_a' for r in rows))
             validate_round(out / 'rodadas/n01_r001', config, 1, 1)
+            directory = out / 'rodadas/n01_r001'
+            with (directory / 'cpu.csv').open() as f:
+                cpu = list(csv.DictReader(f))
+            self.assertTrue({'server', 'client'} <= {r['role'] for r in cpu if r['scope'] == 'process'})
+            self.assertTrue(any(r['name'] == 'cpu0' for r in cpu))
+            with (directory / 'network.csv').open() as f:
+                network = list(csv.DictReader(f))
+            self.assertTrue(network)
+            self.assertEqual({r['interface'] for r in network}, {'lo'})
+            self.assertTrue(any(int(r['rx_bytes']) > 0 for r in network))
+            self.assertTrue(all(r['machine_id'] == 'pc_a' for r in cpu + network))
 
     def test_wait_marker_timeout(self):
         from experiments import wait_marker
@@ -241,13 +252,14 @@ class RunnerTests(unittest.TestCase):
             listener.bind(('0.0.0.0', 0))
             listener.listen()
             out = Path(tmp) / 'campaign'
-            proc = subprocess.run([sys.executable, str(ROOT / 'scripts/experiments.py'), 'loopback', '--clients', '1', '--repetitions', '1', '--duration', '4', '--warmup', '1', '--cooldown', '1', '--port', str(listener.getsockname()[1]), '--output', str(out)], capture_output=True, timeout=15)
+            proc = subprocess.run([sys.executable, str(ROOT / 'scripts/experiments.py'), 'loopback', '--no-monitor', '--clients', '1', '--repetitions', '1', '--duration', '4', '--warmup', '1', '--cooldown', '1', '--port', str(listener.getsockname()[1]), '--output', str(out)], capture_output=True, timeout=15)
             self.assertNotEqual(proc.returncode, 0)
             with (out / 'manifest.csv').open() as f:
                 rows = list(csv.DictReader(f))
             self.assertEqual(rows[0]['status'], 'failed')
             self.assertFalse((out / 'results.csv').exists())
             self.assertTrue((out / 'rodadas/n01_r001/server.log').exists())
+            self.assertFalse((out / 'rodadas/n01_r001/cpu.csv').exists())
 
     def test_lan_manual_client_mode(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -260,11 +272,16 @@ class RunnerTests(unittest.TestCase):
             try:
                 deadline = time.monotonic() + 10
                 log = out / 'rodadas/n01_r001/server.log'
-                while not log.exists() or 'escutando' not in log.read_text():
+                commands_path = out / 'rodadas/n01_r001/commands.json'
+                commands = {}
+                while 'client' not in commands or not log.exists() or 'escutando' not in log.read_text():
                     if time.monotonic() > deadline or server.poll() is not None:
                         self.fail('Executor servidor nao iniciou')
                     time.sleep(.05)
-                commands = json.loads((out / 'rodadas/n01_r001/commands.json').read_text())
+                    try:
+                        commands = json.loads(commands_path.read_text())
+                    except (FileNotFoundError, json.JSONDecodeError):
+                        commands = {}
                 client = subprocess.run(['bash', *commands['client'][1:], '--output', str(client_out)], capture_output=True, timeout=15)
                 self.assertEqual(client.returncode, 0, client.stderr.decode())
                 self.assertEqual(server.wait(timeout=10), 0)
@@ -274,6 +291,14 @@ class RunnerTests(unittest.TestCase):
                     self.assertEqual(config['server_machine_id'], 'pc_a')
                     self.assertEqual(config['client_machine_id'], 'pc_b')
                 self.assertEqual(json.loads((client_out / 'config.json').read_text())['machine']['id'], 'pc_b')
+                for directory, machine, role in ((out / 'rodadas/n01_r001', 'pc_a', 'server'),
+                                                 (client_out, 'pc_b', 'client')):
+                    with (directory / 'cpu.csv').open() as f:
+                        cpu = list(csv.DictReader(f))
+                    self.assertTrue(any(r['scope'] == 'process' and r['role'] == role for r in cpu))
+                    self.assertTrue(all(r['machine_id'] == machine for r in cpu))
+                    with (directory / 'network.csv').open() as f:
+                        self.assertTrue(list(csv.DictReader(f)))
             finally:
                 if server.poll() is None:
                     server.terminate()
