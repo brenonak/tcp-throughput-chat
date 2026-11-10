@@ -21,12 +21,14 @@ Os binarios ficam em `build/`. Flags: `-O2 -Wall -Wextra -pthread`. Os fontes or
 ## Piloto e campanha em loopback
 
 ```bash
-bash scripts/run_experiments.sh loopback --clients 1,10 --repetitions 1 --duration 15 --warmup 2 --cooldown 2 --output results/piloto
-bash scripts/run_experiments.sh loopback --clients 1,2,3,4,5,6,7,8,9,10 --repetitions 2 --duration 15 --warmup 2 --cooldown 2 --output results/campanha_curta
-bash scripts/run_experiments.sh loopback --output results/loopback_completo
+bash scripts/run_experiments.sh loopback --machine-id pc_a --clients 1,10 --repetitions 1 --duration 15 --warmup 2 --cooldown 2 --output results/piloto_pc_a
+bash scripts/run_experiments.sh loopback --machine-id pc_a --clients 1,2,3,4,5,6,7,8,9,10 --repetitions 2 --duration 15 --warmup 2 --cooldown 2 --output results/campanha_curta_pc_a
+bash scripts/run_experiments.sh loopback --machine-id pc_a --output results/loopback_pc_a
 ```
 
 Padrao: N de 1 a 10 em ordem crescente, dez repeticoes por N, 30 segundos, bloco fixo de 65.536 bytes, descartes de cinco segundos no inicio e no fim e intervalo de cinco segundos entre rodadas. Aproximadamente uma hora por campanha. Os parametros podem ser consultados com `bash scripts/run_experiments.sh --help`. O diretorio de saida deve ser novo.
+
+Use um ID estavel para cada maquina, por exemplo `pc_a` e `pc_b`. Sem `--machine-id`, o ID e o hostname. Para executar loopback na segunda maquina, use `--machine-id pc_b` e outra pasta, como `results/loopback_pc_b`. No loopback, cliente e servidor recebem o mesmo ID. `config.json` registra tambem o hostname e o sistema local; os CSVs consolidados e a analise preservam os IDs de cliente e servidor.
 
 ## Dois computadores na rede local
 
@@ -39,13 +41,13 @@ No WSL, o endereco interno pode nao ser acessivel por outra maquina. Valide a co
 No computador A:
 
 ```bash
-bash scripts/run_experiments.sh server --ip 192.168.1.20 --label lan_cabo --interface eth0 --output results/cabo
+bash scripts/run_experiments.sh server --machine-id pc_a --client-machine-id pc_b --ip 192.168.1.20 --label lan_cabo --interface eth0 --output results/cabo_servidor_pc_a
 ```
 
 A cada rodada pronta, o executor mostra um comando para executar no computador B, na raiz do repositorio. Por exemplo:
 
 ```bash
-bash scripts/run_experiments.sh client --ip 192.168.1.20 --port 5000 --duration 30 --clients 5 --rep 1 --label lan_cabo
+bash scripts/run_experiments.sh client --machine-id pc_b --server-machine-id pc_a --ip 192.168.1.20 --port 5000 --duration 30 --clients 5 --rep 1 --label lan_cabo --interface eth0
 ```
 
 Execute somente o comando da rodada atual e espere o servidor indicar a proxima. O modo cliente compila seu binario, coleta seu ambiente e salva um log em um novo diretorio. Para coletar informacoes da interface uma unica vez:
@@ -54,7 +56,15 @@ Execute somente o comando da rodada atual e espere o servidor indicar a proxima.
 bash scripts/coleta_ambiente.sh results/ambiente_cliente eth0
 ```
 
-Copie essa pasta para `results/cabo/ambiente/cliente` no servidor. Preencha `notas.txt` com cabo, switch/roteador, velocidade ou condicoes de Wi-Fi e outras cargas nas maquinas. Para Wi-Fi, use `--label lan_wifi` e outro diretorio. Mantenha o tipo de conexao fixo durante a campanha. SSH nao e necessario.
+Copie essa pasta para `results/cabo_servidor_pc_a/ambiente/cliente` no servidor. Preserve tambem as pastas de cada rodada executada no cliente, que contem sua configuracao e monitoramento. Preencha `notas.txt` com cabo, switch/roteador, velocidade ou condicoes de Wi-Fi e outras cargas nas maquinas. Para Wi-Fi, use `--label lan_wifi` e outro diretorio. Mantenha o tipo de conexao fixo durante a campanha. SSH nao e necessario.
+
+Para inverter os papeis, inicie o modo servidor no computador B, usando o IPv4 e a interface dele. Por exemplo:
+
+```bash
+bash scripts/run_experiments.sh server --machine-id pc_b --client-machine-id pc_a --ip 192.168.1.21 --label lan_cabo --interface eth0 --output results/cabo_servidor_pc_b
+```
+
+Execute os comandos gerados no computador A. Os IDs da outra maquina sao declarados nos argumentos; nao ha verificacao automatica da identidade remota. Assim, as quatro campanhas sao loopback em A, loopback em B, LAN com servidor A e LAN com servidor B. Use os mesmos parametros experimentais nas quatro.
 
 ## Protocolo e medicao
 
@@ -79,13 +89,27 @@ O executor espera ate 60 segundos pelos clientes e, apos START, ate duracao + 30
 
 A coleta apenas consulta o sistema. Comandos ausentes ou sem permissao ficam registrados. O cliente nao informa os bytes enviados; por isso a validacao verifica os dados recebidos, sem comprovar igualdade entre envio e recepcao nem identificar toda desconexao individual antecipada.
 
+## Monitoramento de CPU e rede
+
+O executor coleta automaticamente contadores Linux de `/proc` aproximadamente a cada segundo, em uma thread Python. Usa apenas a biblioteca padrao, sem alterar os programas C. O ultimo intervalo pode ser menor que um segundo. A configuracao da coleta fica em `config.json`.
+
+No servidor e no loopback, cada pasta em `rodadas/` recebe `cpu.csv` e `network.csv`. No modo cliente LAN, esses arquivos ficam na pasta de saida do proprio cliente. Cada linha identifica maquina, papel, N, repeticao, horario UTC, tempo desde o inicio local do monitor e duracao real do intervalo.
+
+- `cpu.csv`: utilizacao geral (`name=cpu`), por processador logico (`cpu0`, `cpu1`, etc.) e dos processos locais cliente/servidor. `scope` distingue sistema de processo. Para processos, 100% equivale a um processador logico ocupado; programas com varias threads podem superar 100%. Amostras de processos ja encerrados ficam ausentes.
+- `network.csv`: bytes recebidos/enviados, Mbps, erros e descartes em cada intervalo. Os valores sao diferencas dos contadores da interface. Incluem trafego de outros programas e cabecalhos conforme contabilizados pela interface. Nao equivalem a carga util medida pelo servidor nem medem retransmissoes TCP.
+- `monitoring_warnings.txt`: criado se houver falhas de coleta ou interface ausente. Uma falha do monitor nao invalida automaticamente a medicao de vazao; confira os avisos antes de usar as metricas.
+
+Loopback monitora `lo` por padrao. Na LAN, `--interface` seleciona a interface local; sem esse argumento, todas sao registradas. Acrescente `--interface` ao comando gerado para o cliente usando o nome da interface dele, que pode diferir do servidor. No WSL2, os contadores sao das interfaces e processadores visiveis ao Linux.
+
+A coleta cobre a vida da rodada, incluindo espera por conexoes e encerramento. `elapsed_s` comeca no monitor local, sem sincronizacao com `GO` ou com o outro computador. Para comparar custos, mantenha o monitoramento igual nas campanhas. `--no-monitor` desativa a coleta e e propagado ao comando cliente LAN, permitindo um piloto para avaliar seu impacto. Os novos CSVs ficam disponiveis para discutir gargalos; `analyze.py` continua gerando os graficos de vazao.
+
 ## Analise
 
 Com o ambiente Python ativado:
 
 ```bash
-python3 scripts/analyze.py results/loopback_completo --output results/loopback_completo/analise
-python3 scripts/analyze.py results/loopback_completo results/cabo --output results/comparacao
+python3 scripts/analyze.py results/loopback_pc_a --output results/loopback_pc_a/analise
+python3 scripts/analyze.py results/loopback_pc_a results/loopback_pc_b results/cabo_servidor_pc_a results/cabo_servidor_pc_b --output results/comparacao
 ```
 
 O diretorio de analise deve estar vazio ou nao existir. Campanhas com duracoes, blocos ou descartes diferentes sao rejeitadas. Cada campanha permanece identificada, mesmo quando usa o mesmo tipo de rede.
