@@ -1,5 +1,6 @@
 """Executor local e coordenador manual LAN. Requer Linux e Python 3."""
 import argparse
+from contextlib import ExitStack, nullcontext
 import csv
 import json
 import os
@@ -15,6 +16,7 @@ import time
 from datetime import datetime, timezone
 
 from metrics import SUMMARY, SAMPLES, IDENTITY, MANIFEST, validate_round
+from monitoring import RoundMonitor
 
 ROOT = Path(__file__).resolve().parents[1]
 children = []
@@ -103,6 +105,7 @@ def main():
     p.add_argument('--rep', type=int, default=1, help='Identificacao no modo client')
     p.add_argument('--output', type=Path, help='Diretorio novo, nunca sobrescrito')
     p.add_argument('--interface')
+    p.add_argument('--no-monitor', action='store_true', help='Desativa a coleta de CPU e rede por segundo')
     p.add_argument('--machine-id', type=machine_id, default=socket.gethostname(),
                    help='ID estavel desta maquina (padrao: hostname). Use o mesmo em todas as campanhas')
     p.add_argument('--client-machine-id', type=machine_id, help='ID da outra maquina no modo server')
@@ -143,14 +146,19 @@ def main():
                            'system': platform.system(), 'release': platform.release(),
                            'architecture': platform.machine()},
                   compile_flags='-O2 -Wall -Wextra -pthread', created_at=stamp(),
+                  monitoring={'enabled': not args.no_monitor, 'interval_s': 1,
+                              'interface': args.interface or ('lo' if args.mode == 'loopback' else 'all')},
                   order=[{'n_clients': n, 'rep': r} for n in sorted(ns)
                          for r in range(1, args.repetitions + 1)])
     (out / 'config.json').write_text(json.dumps(config, indent=2) + '\n')
     subprocess.run(['make', '-C', str(ROOT), 'client' if args.mode == 'client' else 'all'], check=True)
     subprocess.run(['bash', str(ROOT / 'scripts/coleta_ambiente.sh'), str(out / 'ambiente' / args.mode), args.interface or ''], check=True)
     if args.mode == 'client':
-        proc = launch([str(ROOT / 'build/chat_client'), args.ip, str(args.port), str(args.duration), str(ns[0])], out / f'client_n{ns[0]}_r{args.rep}.log')
-        rc = proc.wait(timeout=60 + args.duration + 30)
+        with nullcontext() if args.no_monitor else RoundMonitor(out, args.machine_id, 'client', ns[0], args.rep, args.interface) as monitor:
+            proc = launch([str(ROOT / 'build/chat_client'), args.ip, str(args.port), str(args.duration), str(ns[0])], out / f'client_n{ns[0]}_r{args.rep}.log')
+            if monitor:
+                monitor.add_process('client', proc.pid)
+            rc = proc.wait(timeout=60 + args.duration + 30)
         if rc:
             raise RuntimeError(f'Cliente terminou com codigo {rc}')
         return
@@ -160,11 +168,17 @@ def main():
             directory = out / 'rodadas' / f'n{n:02}_r{rep:03}'
             directory.mkdir(parents=True)
             entry = dict(n_clients=n, rep=rep, started_at=stamp(), status='failed', reason='', **identity)
+            monitoring = ExitStack()
             try:
+                monitor = monitoring.enter_context(nullcontext() if args.no_monitor else
+                    RoundMonitor(directory, args.machine_id, args.mode, n, rep,
+                                 args.interface or ('lo' if args.mode == 'loopback' else None)))
                 command = [str(ROOT / 'build/chat_server'), '-p', str(args.port), '-n', str(n), '-d', str(args.duration), '-w', str(args.warmup), '-c', str(args.cooldown), '-r', str(rep), '-l', label, '-o', str(directory / 'results.csv'), '-s', str(directory / 'samples.csv')]
                 (directory / 'commands.json').write_text(json.dumps({'server': command}, indent=2))
                 log = directory / 'server.log'
                 server = launch(command, log)
+                if monitor:
+                    monitor.add_process('server', server.pid)
                 wait_marker(server, log, '[server] escutando', 10)
                 print(f'Rodada N={n}, repeticao={rep}', flush=True)
                 client_command = [str(ROOT / 'build/chat_client'), '127.0.0.1', str(args.port), str(args.duration), str(n)]
@@ -172,9 +186,13 @@ def main():
                 if args.mode == 'loopback':
                     (directory / 'commands.json').write_text(json.dumps({'server': command, 'client': client_command}, indent=2))
                     client = launch(client_command, directory / 'client.log')
+                    if monitor:
+                        monitor.add_process('client', client.pid)
                 else:
                     manual = ['bash', 'scripts/run_experiments.sh', 'client', '--ip', args.ip, '--port', str(args.port), '--duration', str(args.duration), '--clients', str(n), '--rep', str(rep), '--label', label,
                               '--machine-id', identity['client_machine_id'], '--server-machine-id', identity['server_machine_id']]
+                    if args.no_monitor:
+                        manual.append('--no-monitor')
                     (directory / 'commands.json').write_text(json.dumps({'server': command, 'client': manual}, indent=2))
                     print('No computador cliente, na raiz do repositorio:\n' + shlex.join(manual), flush=True)
                 wait_marker(server, log, '[server] START', 60)
@@ -189,6 +207,7 @@ def main():
                 entry['reason'] = str(exc) or type(exc).__name__
                 raise
             finally:
+                monitoring.close()
                 stop_children()
                 entry['finished_at'] = stamp()
                 append_csv(out / 'manifest.csv', manifest_header, [entry])
