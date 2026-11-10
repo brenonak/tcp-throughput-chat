@@ -1,0 +1,2 @@
+Comando: git -C /mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/scripts/.. rev-parse HEAD
+388a39f37ba3bd023a62156ebe3efdc4fb98c712

@@ -1,0 +1,11 @@
+campaign,label,n_clients,server_machine_id,client_machine_id,count,maximum,mean,std,ci95_low,ci95_high
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430,loopback,1,D15-126,D15-126,10,50864.062,49993.288199999995,605.058546892189,49560.4553899534,50426.12101004659
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430,loopback,2,D15-126,D15-126,10,100454.42,95644.7777,2029.4663682200382,94192.98491802273,97096.57048197728
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430,loopback,3,D15-126,D15-126,10,140480.06,132819.0276,3629.835780109594,130222.39950709503,135415.65569290498
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430,loopback,4,D15-126,D15-126,10,163652.226,157649.5061,4226.03494356023,154626.38281817615,160672.62938182385
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430,loopback,5,D15-126,D15-126,10,171059.157,162374.90860000002,5244.418289996395,158623.27775835953,166126.53944164052
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430,loopback,6,D15-126,D15-126,10,168248.738,162581.5169,3380.1521955672515,160163.5016836093,164999.53211639068
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430,loopback,7,D15-126,D15-126,10,158238.013,153965.82489999998,3508.422861778287,151456.0503766995,156475.59942330045
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430,loopback,8,D15-126,D15-126,10,147320.59,145229.6254,1376.4146747078626,144244.99765694403,146214.25314305595
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430,loopback,9,D15-126,D15-126,10,144362.178,143108.8734,1159.539951935559,142279.38848761353,143938.3583123865
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430,loopback,10,D15-126,D15-126,10,143948.095,142425.9962,989.996766789869,141717.79517597074,143134.19722402925

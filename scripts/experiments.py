@@ -2,6 +2,7 @@
 import argparse
 from contextlib import ExitStack, nullcontext
 import csv
+import errno
 import json
 import os
 from pathlib import Path
@@ -51,7 +52,15 @@ def wait_marker(proc, log, marker, timeout):
     while time.monotonic() < deadline:
         if proc.poll() is not None:
             raise RuntimeError(f'Servidor terminou antes de {marker}. Consulte {log}')
-        if marker in log.read_text(errors='replace'):
+        try:
+            content = log.read_text(errors='replace')
+        except OSError as exc:
+            # DrvFS pode retornar ENODATA durante uma escrita concorrente no log.
+            if exc.errno != errno.ENODATA:
+                raise
+            time.sleep(0.05)
+            continue
+        if marker in content:
             return
         time.sleep(0.05)
     raise TimeoutError(f'Tempo esgotado esperando {marker}')

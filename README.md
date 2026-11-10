@@ -85,6 +85,8 @@ As amostras sao cumulativas por segundo. A janela usa a diferenca entre o contad
 
 Cada campanha guarda configuracao, ambiente, ordem implicita das rodadas por N e repeticao, comandos do servidor, logs e CSVs brutos por rodada. `manifest.csv` registra todas as tentativas e os motivos de falha. Apenas rodadas validadas entram nos CSVs consolidados. `duration_s` no resumo e o tempo efetivamente medido pelo servidor; a duracao solicitada esta em config.json.
 
+Para compartilhar resultados com o grupo pelo Git, use `--output results/compartilhados/<campanha>`. Essa pasta e permitida pelo `.gitignore`; as demais pastas de resultados locais continuam ignoradas. Inclua a campanha no commit e envie ao repositorio remoto para que o grupo tenha acesso aos CSVs, logs, ambiente e analises. Preserve um diretorio diferente para cada maquina e campanha.
+
 O executor espera ate 60 segundos pelos clientes e, apos START, ate duracao + 30 segundos pela conclusao. No loopback nao abre conexao de sondagem. Para na primeira falha e preserva os dados. Ctrl+C encerra somente os processos locais que criou. Na LAN, interrompa tambem o comando no outro computador se necessario. Uma nova execucao cria outra campanha.
 
 A coleta apenas consulta o sistema. Comandos ausentes ou sem permissao ficam registrados. O cliente nao informa os bytes enviados; por isso a validacao verifica os dados recebidos, sem comprovar igualdade entre envio e recepcao nem identificar toda desconexao individual antecipada.

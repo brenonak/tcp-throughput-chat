@@ -247,6 +247,19 @@ class RunnerTests(unittest.TestCase):
             with self.assertRaises(TimeoutError):
                 wait_marker(proc, log, 'START', .05)
 
+    def test_wait_marker_retries_transient_log_read(self):
+        import errno
+        from experiments import wait_marker
+        from unittest.mock import Mock
+        log, proc = Mock(), Mock()
+        proc.poll.return_value = None
+        log.read_text.side_effect = [OSError(errno.ENODATA, 'No data available'), '[server] START']
+        wait_marker(proc, log, 'START', 1)
+        self.assertEqual(log.read_text.call_count, 2)
+        log.read_text.side_effect = PermissionError(errno.EACCES, 'Permission denied')
+        with self.assertRaises(PermissionError):
+            wait_marker(proc, log, 'START', 1)
+
     def test_busy_port_is_failed_and_preserved(self):
         with socket.socket() as listener, tempfile.TemporaryDirectory() as tmp:
             listener.bind(('0.0.0.0', 0))

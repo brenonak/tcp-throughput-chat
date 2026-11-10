@@ -1,5 +1,6 @@
 /build/
-/results/
+/results/*
+!/results/compartilhados/
 /.venv/
 __pycache__/
 *.pyc

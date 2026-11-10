@@ -1,0 +1,2 @@
+timestamp,label,rep,n_clients,block_bytes,duration_s,bytes_total,bytes_window,window_s,mbps_total,mbps_window
+2026-11-10T16:11:42,loopback,6,8,65536,30.007,542573527040,361424762960,20.000,144652.728,144569.905

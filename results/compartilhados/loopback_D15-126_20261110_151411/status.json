@@ -1,0 +1,8 @@
+{
+  "status": "incomplete",
+  "machine_id": "D15-126",
+  "valid_rounds": 8,
+  "planned_rounds": 100,
+  "failed_round": {"n_clients": 1, "rep": 9},
+  "reason": "Executor interrompido por OSError ENODATA durante espera pelo marcador START. Os logs mostram que o servidor iniciou a transmissao. Tentativa preservada; nao representa a campanha completa."
+}

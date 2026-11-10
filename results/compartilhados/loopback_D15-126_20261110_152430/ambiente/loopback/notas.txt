@@ -1,0 +1,10 @@
+Conexao (loopback/cabo/Wi-Fi): loopback, IPv4 127.0.0.1
+Interface: lo, visivel ao Ubuntu no WSL2
+Cabo e velocidade: nao aplicavel ao caminho medido em loopback
+Roteador/switch: nao participa do caminho medido em loopback
+Condicoes da rede e outras cargas: nenhuma carga adicional foi iniciada pelo executor alem dos clientes, servidor e monitor. Outros programas do usuario nao foram controlados ou inventariados.
+Flags: -O2 -Wall -Wextra -pthread
+Maquina: D15-126, usada como cliente e servidor nesta campanha.
+Recursos de CPU e RAM: os arquivos cpu.txt e ram.txt descrevem os recursos visiveis ao WSL2. Nao comprovam a RAM fisica total instalada no Windows.
+Parametros: 1 a 10 clientes, 10 repeticoes por quantidade, 30 s de transmissao, warmup 5 s, cooldown 5 s, intervalo 5 s, blocos solicitados de 65536 bytes.
+Tentativa anterior incompleta: ../loopback_D15-126_20261110_151411. Os dados dessa tentativa nao foram combinados com esta campanha.

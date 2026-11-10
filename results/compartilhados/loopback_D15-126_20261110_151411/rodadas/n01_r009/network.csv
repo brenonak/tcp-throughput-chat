@@ -1,0 +1,2 @@
+timestamp,elapsed_s,interval_s,machine_id,role,n_clients,rep,interface,rx_bytes,tx_bytes,rx_mbps,tx_mbps,rx_errors,tx_errors,rx_dropped,tx_dropped
+2026-11-10T18:19:34.535913+00:00,0.03802057600000808,0.03802057600000808,D15-126,loopback,1,9,lo,3146370,3146370,662.0352095663845,662.0352095663845,0,0,0,0
