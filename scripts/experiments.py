@@ -4,14 +4,17 @@ import csv
 import json
 import os
 from pathlib import Path
+import platform
+import re
 import shlex
 import signal
+import socket
 import subprocess
 import sys
 import time
 from datetime import datetime, timezone
 
-from metrics import SUMMARY, SAMPLES, validate_round
+from metrics import SUMMARY, SAMPLES, IDENTITY, MANIFEST, validate_round
 
 ROOT = Path(__file__).resolve().parents[1]
 children = []
@@ -61,6 +64,30 @@ def append_csv(path, header, rows):
         writer.writerows(rows)
 
 
+def machine_id(value):
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,63}', value):
+        raise argparse.ArgumentTypeError('ID de maquina deve ter 1 a 64 letras ASCII, numeros, pontos, hifens ou sublinhados, iniciando com letra ou numero')
+    return value
+
+
+def identify_machines(mode, local_id, server_id=None, client_id=None):
+    if mode == 'loopback':
+        if server_id is not None or client_id is not None:
+            raise ValueError('Loopback usa apenas --machine-id para ambos os papeis')
+        return dict(server_machine_id=local_id, client_machine_id=local_id)
+    if mode == 'server':
+        if server_id is not None or client_id is None:
+            raise ValueError('Modo server exige --client-machine-id; identifique o servidor com --machine-id')
+        server_id = local_id
+    else:
+        if client_id is not None or server_id is None:
+            raise ValueError('Modo client exige --server-machine-id; identifique o cliente com --machine-id')
+        client_id = local_id
+    if server_id == client_id:
+        raise ValueError('Na LAN, servidor e cliente devem ter IDs de maquina distintos')
+    return dict(server_machine_id=server_id, client_machine_id=client_id)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('mode', choices=['loopback', 'server', 'client'])
@@ -76,7 +103,15 @@ def main():
     p.add_argument('--rep', type=int, default=1, help='Identificacao no modo client')
     p.add_argument('--output', type=Path, help='Diretorio novo, nunca sobrescrito')
     p.add_argument('--interface')
+    p.add_argument('--machine-id', type=machine_id, default=socket.gethostname(),
+                   help='ID estavel desta maquina (padrao: hostname). Use o mesmo em todas as campanhas')
+    p.add_argument('--client-machine-id', type=machine_id, help='ID da outra maquina no modo server')
+    p.add_argument('--server-machine-id', type=machine_id, help='ID da outra maquina no modo client')
     args = p.parse_args()
+    try:
+        identity = identify_machines(args.mode, args.machine_id, args.server_machine_id, args.client_machine_id)
+    except ValueError as exc:
+        p.error(str(exc))
     try:
         ns = [int(v) for v in args.clients.split(',')]
     except ValueError:
@@ -100,8 +135,13 @@ def main():
     out = out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     print(f'Saida: {out}', flush=True)
+    print(f'Maquinas: servidor={identity["server_machine_id"]}, cliente={identity["client_machine_id"]}', flush=True)
     config = vars(args).copy()
     config.update(output=str(out), clients=sorted(ns), label=label, block_bytes=65536,
+                  **identity,
+                  machine={'id': args.machine_id, 'hostname': socket.gethostname(),
+                           'system': platform.system(), 'release': platform.release(),
+                           'architecture': platform.machine()},
                   compile_flags='-O2 -Wall -Wextra -pthread', created_at=stamp(),
                   order=[{'n_clients': n, 'rep': r} for n in sorted(ns)
                          for r in range(1, args.repetitions + 1)])
@@ -114,12 +154,12 @@ def main():
         if rc:
             raise RuntimeError(f'Cliente terminou com codigo {rc}')
         return
-    manifest_header = ['n_clients', 'rep', 'started_at', 'finished_at', 'status', 'reason']
+    manifest_header = MANIFEST + IDENTITY
     for n in sorted(ns):
         for rep in range(1, args.repetitions + 1):
             directory = out / 'rodadas' / f'n{n:02}_r{rep:03}'
             directory.mkdir(parents=True)
-            entry = dict(n_clients=n, rep=rep, started_at=stamp(), status='failed', reason='')
+            entry = dict(n_clients=n, rep=rep, started_at=stamp(), status='failed', reason='', **identity)
             try:
                 command = [str(ROOT / 'build/chat_server'), '-p', str(args.port), '-n', str(n), '-d', str(args.duration), '-w', str(args.warmup), '-c', str(args.cooldown), '-r', str(rep), '-l', label, '-o', str(directory / 'results.csv'), '-s', str(directory / 'samples.csv')]
                 (directory / 'commands.json').write_text(json.dumps({'server': command}, indent=2))
@@ -133,7 +173,8 @@ def main():
                     (directory / 'commands.json').write_text(json.dumps({'server': command, 'client': client_command}, indent=2))
                     client = launch(client_command, directory / 'client.log')
                 else:
-                    manual = ['bash', 'scripts/run_experiments.sh', 'client', '--ip', args.ip, '--port', str(args.port), '--duration', str(args.duration), '--clients', str(n), '--rep', str(rep), '--label', label]
+                    manual = ['bash', 'scripts/run_experiments.sh', 'client', '--ip', args.ip, '--port', str(args.port), '--duration', str(args.duration), '--clients', str(n), '--rep', str(rep), '--label', label,
+                              '--machine-id', identity['client_machine_id'], '--server-machine-id', identity['server_machine_id']]
                     (directory / 'commands.json').write_text(json.dumps({'server': command, 'client': manual}, indent=2))
                     print('No computador cliente, na raiz do repositorio:\n' + shlex.join(manual), flush=True)
                 wait_marker(server, log, '[server] START', 60)
@@ -141,8 +182,8 @@ def main():
                 if rc or (client is not None and client.wait(timeout=5)):
                     raise RuntimeError('Servidor ou cliente terminou com erro')
                 row, samples, _ = validate_round(directory, config, n, rep)
-                append_csv(out / 'results.csv', SUMMARY, [row])
-                append_csv(out / 'samples.csv', SAMPLES, samples)
+                append_csv(out / 'results.csv', SUMMARY + IDENTITY, [dict(row, **identity)])
+                append_csv(out / 'samples.csv', SAMPLES + IDENTITY, [dict(sample, **identity) for sample in samples])
                 entry['status'] = 'valid'
             except BaseException as exc:
                 entry['reason'] = str(exc) or type(exc).__name__

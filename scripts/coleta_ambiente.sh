@@ -9,6 +9,7 @@ capture() {
     { printf 'Comando:'; printf ' %q' "$@"; printf '\n'; "$@"; } >"$OUT/$name.txt" 2>&1 || printf '\nConsulta indisponivel (ferramenta ou permissao).\n' >>"$OUT/$name.txt"
 }
 capture cpu lscpu
+capture hostname hostname
 capture ram free -h
 capture kernel uname -a
 capture os cat /etc/os-release

@@ -5,12 +5,18 @@ from pathlib import Path
 
 SUMMARY = 'timestamp,label,rep,n_clients,block_bytes,duration_s,bytes_total,bytes_window,window_s,mbps_total,mbps_window'.split(',')
 SAMPLES = 'timestamp,label,rep,n_clients,tick_s,client_index,client_name,bytes_cumulative'.split(',')
+IDENTITY = ['server_machine_id', 'client_machine_id']
+MANIFEST = ['n_clients', 'rep', 'started_at', 'finished_at', 'status', 'reason']
 
 
-def read_csv(path, header):
+def campaign_identity(config):
+    return {key: config.get(key) or 'nao_informado' for key in IDENTITY}
+
+
+def read_csv(path, header, optional_header=None):
     with Path(path).open(newline='') as f:
         reader = csv.DictReader(f)
-        if reader.fieldnames != header:
+        if reader.fieldnames != header and reader.fieldnames != header + (optional_header or []):
             raise ValueError(f'Cabecalho invalido: {path}')
         rows = list(reader)
     if not rows or any(None in r or any(v is None for v in r.values()) for r in rows):

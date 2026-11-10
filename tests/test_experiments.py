@@ -11,7 +11,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from metrics import SUMMARY, SAMPLES, validate_round
+from metrics import SUMMARY, SAMPLES, IDENTITY, MANIFEST, validate_round
 
 
 class MetricsTests(unittest.TestCase):
@@ -131,8 +131,100 @@ class AnalysisTests(unittest.TestCase):
         self.assertAlmostEqual(result['ci95_high'], 44.841377, places=5)
         self.assertTrue(pd.isna(describe(pd.Series([10.]))['std']))
 
+    def test_machine_roles_in_analysis_and_legacy_campaign(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            campaigns = []
+            roles = [('loopback', 'pc_a', 'pc_a'), ('loopback', 'pc_b', 'pc_b'),
+                     ('lan_cabo', 'pc_a', 'pc_b'), ('lan_cabo', 'pc_b', 'pc_a'),
+                     ('loopback', None, None)]
+            for index, (label, server, client) in enumerate(roles):
+                campaign = root / f'campaign_{index}'
+                directory = campaign / 'rodadas/n01_r001'
+                directory.mkdir(parents=True)
+                config = dict(label=label, duration=4, warmup=1, cooldown=1, block_bytes=65536, repetitions=1)
+                identity = dict(server_machine_id=server, client_machine_id=client) if server else {}
+                config.update(identity)
+                (campaign / 'config.json').write_text(json.dumps(config))
+                with (campaign / 'manifest.csv').open('w', newline='') as f:
+                    writer = csv.DictWriter(f, fieldnames=MANIFEST + (IDENTITY if server else []))
+                    writer.writeheader()
+                    writer.writerow(dict(n_clients=1, rep=1, started_at='now', finished_at='now',
+                                         status='valid', reason='', **identity))
+                with (directory / 'results.csv').open('w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(SUMMARY)
+                    writer.writerow(['now', label, 1, 1, 65536, 4, 5000000, 2000000, 2, 10, 8])
+                with (directory / 'samples.csv').open('w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(SAMPLES)
+                    for tick in range(1, 5):
+                        writer.writerow(['now', label, 1, 1, tick, 0, 'cliente', tick * 1000000])
+                campaigns.append(campaign)
+            output = root / 'analysis'
+            command = [sys.executable, str(ROOT / 'scripts/analyze.py'), *map(str, campaigns), '--output', str(output)]
+            proc = subprocess.run(command, capture_output=True, text=True, timeout=45)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            for filename in ('summary.csv', 'rounds.csv', 'per_client.csv'):
+                with (output / filename).open() as f:
+                    rows = list(csv.DictReader(f))
+                actual = {(r['label'], r['server_machine_id'], r['client_machine_id']) for r in rows}
+                expected = {(label, server or 'nao_informado', client or 'nao_informado')
+                            for label, server, client in roles}
+                self.assertEqual(actual, expected)
+                self.assertEqual(len(rows), 5)
+            self.assertIn('sem identificacao', (output / 'warnings.txt').read_text())
+            for name in ('throughput_max', 'throughput_mean', 'per_client'):
+                for ext in ('png', 'pdf'):
+                    self.assertGreater((output / f'{name}.{ext}').stat().st_size, 0)
+            manifest = campaigns[2] / 'manifest.csv'
+            manifest.write_text(manifest.read_text().replace('pc_a', 'pc_errado'))
+            proc = subprocess.run(command, capture_output=True, text=True, timeout=45)
+            self.assertNotEqual(proc.returncode, 0)
+            self.assertIn('Maquinas do manifesto inconsistentes', proc.stderr)
+
 
 class RunnerTests(unittest.TestCase):
+    def test_machine_identity_validation(self):
+        from experiments import identify_machines, machine_id
+        import argparse
+        self.assertEqual(identify_machines('loopback', 'pc_a'),
+                         dict(server_machine_id='pc_a', client_machine_id='pc_a'))
+        self.assertEqual(identify_machines('server', 'pc_a', client_id='pc_b'),
+                         identify_machines('client', 'pc_b', server_id='pc_a'))
+        for mode, local, server, client in [('server', 'a', None, None), ('client', 'b', None, None),
+                                           ('server', 'a', None, 'a'), ('client', 'a', 'a', None),
+                                           ('loopback', 'a', None, 'b')]:
+            with self.subTest(mode=mode, local=local, server=server, client=client):
+                with self.assertRaises(ValueError):
+                    identify_machines(mode, local, server, client)
+        for value in ('', 'pc a', '../pc', 'a' * 65):
+            with self.assertRaises(argparse.ArgumentTypeError):
+                machine_id(value)
+
+    def test_loopback_records_both_roles(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / 'loopback'
+            with socket.socket() as reserved:
+                reserved.bind(('127.0.0.1', 0))
+                port = reserved.getsockname()[1]
+            proc = subprocess.run([sys.executable, str(ROOT / 'scripts/experiments.py'), 'loopback',
+                                   '--machine-id', 'pc_a', '--clients', '1', '--repetitions', '1',
+                                   '--duration', '4', '--warmup', '1', '--cooldown', '1',
+                                   '--port', str(port), '--output', str(out)], capture_output=True, text=True, timeout=20)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            config = json.loads((out / 'config.json').read_text())
+            self.assertEqual(config['machine']['id'], 'pc_a')
+            self.assertEqual(config['machine']['hostname'], socket.gethostname())
+            self.assertEqual(config['server_machine_id'], 'pc_a')
+            self.assertEqual(config['client_machine_id'], 'pc_a')
+            for filename in ('results.csv', 'samples.csv', 'manifest.csv'):
+                with (out / filename).open() as f:
+                    rows = list(csv.DictReader(f))
+                self.assertTrue(rows)
+                self.assertTrue(all(r['server_machine_id'] == r['client_machine_id'] == 'pc_a' for r in rows))
+            validate_round(out / 'rodadas/n01_r001', config, 1, 1)
+
     def test_wait_marker_timeout(self):
         from experiments import wait_marker
         from unittest.mock import Mock
@@ -164,7 +256,7 @@ class RunnerTests(unittest.TestCase):
             with socket.socket() as reserved:
                 reserved.bind(('127.0.0.1', 0))
                 port = reserved.getsockname()[1]
-            server = subprocess.Popen([sys.executable, str(ROOT / 'scripts/experiments.py'), 'server', '--ip', '127.0.0.2', '--label', 'lan_cabo', '--clients', '1', '--repetitions', '1', '--duration', '4', '--warmup', '1', '--cooldown', '1', '--port', str(port), '--output', str(out)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            server = subprocess.Popen([sys.executable, str(ROOT / 'scripts/experiments.py'), 'server', '--machine-id', 'pc_a', '--client-machine-id', 'pc_b', '--ip', '127.0.0.2', '--label', 'lan_cabo', '--clients', '1', '--repetitions', '1', '--duration', '4', '--warmup', '1', '--cooldown', '1', '--port', str(port), '--output', str(out)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             try:
                 deadline = time.monotonic() + 10
                 log = out / 'rodadas/n01_r001/server.log'
@@ -172,10 +264,16 @@ class RunnerTests(unittest.TestCase):
                     if time.monotonic() > deadline or server.poll() is not None:
                         self.fail('Executor servidor nao iniciou')
                     time.sleep(.05)
-                client = subprocess.run([sys.executable, str(ROOT / 'scripts/experiments.py'), 'client', '--ip', '127.0.0.2', '--clients', '1', '--duration', '4', '--port', str(port), '--output', str(client_out)], capture_output=True, timeout=15)
+                commands = json.loads((out / 'rodadas/n01_r001/commands.json').read_text())
+                client = subprocess.run(['bash', *commands['client'][1:], '--output', str(client_out)], capture_output=True, timeout=15)
                 self.assertEqual(client.returncode, 0, client.stderr.decode())
                 self.assertEqual(server.wait(timeout=10), 0)
                 self.assertTrue((out / 'results.csv').exists())
+                for campaign in (out, client_out):
+                    config = json.loads((campaign / 'config.json').read_text())
+                    self.assertEqual(config['server_machine_id'], 'pc_a')
+                    self.assertEqual(config['client_machine_id'], 'pc_b')
+                self.assertEqual(json.loads((client_out / 'config.json').read_text())['machine']['id'], 'pc_b')
             finally:
                 if server.poll() is None:
                     server.terminate()
@@ -188,7 +286,7 @@ class RunnerTests(unittest.TestCase):
             with socket.socket() as reserved:
                 reserved.bind(('127.0.0.1', 0))
                 port = reserved.getsockname()[1]
-            proc = subprocess.Popen([sys.executable, str(ROOT / 'scripts/experiments.py'), 'server', '--ip', '127.0.0.2', '--label', 'lan_cabo', '--clients', '1', '--repetitions', '1', '--duration', '4', '--warmup', '1', '--cooldown', '1', '--port', str(port), '--output', str(out)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            proc = subprocess.Popen([sys.executable, str(ROOT / 'scripts/experiments.py'), 'server', '--machine-id', 'pc_a', '--client-machine-id', 'pc_b', '--ip', '127.0.0.2', '--label', 'lan_cabo', '--clients', '1', '--repetitions', '1', '--duration', '4', '--warmup', '1', '--cooldown', '1', '--port', str(port), '--output', str(out)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             try:
                 log = out / 'rodadas/n01_r001/server.log'
                 deadline = time.monotonic() + 10
