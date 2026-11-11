@@ -1,0 +1,11 @@
+campaign,label,n_clients,server_machine_id,client_machine_id,count,maximum,mean,std,ci95_low,ci95_high
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652,lan_wifi,1,D15-126,ANVS14,5,83.484,61.2402,18.14772647468547,38.7068213871337,83.7735786128663
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652,lan_wifi,2,D15-126,ANVS14,5,86.116,81.3706,8.285271287049085,71.08307692751977,91.65812307248022
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652,lan_wifi,3,D15-126,ANVS14,5,89.707,67.959,13.255509062272937,51.50011161951193,84.41788838048808
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652,lan_wifi,4,D15-126,ANVS14,5,80.114,68.39720000000001,7.787022582476566,58.72833440613914,78.06606559386088
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652,lan_wifi,5,D15-126,ANVS14,5,70.409,65.0352,4.184685555689938,59.83922660169648,70.23117339830353
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652,lan_wifi,6,D15-126,ANVS14,5,78.106,62.16919999999999,12.294090661777306,46.90407023461799,77.43432976538199
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652,lan_wifi,7,D15-126,ANVS14,5,86.853,68.69579999999999,11.685131479790886,54.18679292726614,83.20480707273384
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652,lan_wifi,8,D15-126,ANVS14,5,83.971,71.9952,12.403907779405651,56.59371427327237,87.39668572672763
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652,lan_wifi,9,D15-126,ANVS14,5,91.62,77.1424,11.55800131078034,62.791245881212106,91.49355411878788
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652,lan_wifi,10,D15-126,ANVS14,5,80.138,68.1768,11.211433837828238,54.25596623532519,82.09763376467481

@@ -1,0 +1,2 @@
+timestamp,label,rep,n_clients,block_bytes,duration_s,bytes_total,bytes_window,window_s,mbps_total,mbps_window
+2026-11-11T10:07:13,lan_wifi,5,8,65536,31.311,331677696,220422240,20.999894303,84.745,83.971

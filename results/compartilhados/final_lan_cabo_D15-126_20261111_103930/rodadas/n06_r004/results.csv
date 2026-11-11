@@ -1,0 +1,2 @@
+timestamp,label,rep,n_clients,block_bytes,duration_s,bytes_total,bytes_window,window_s,mbps_total,mbps_window
+2026-11-11T11:01:16,lan_cabo,4,6,65536,30.165,3545497600,2353653829,19.999995315,940.293,941.462
