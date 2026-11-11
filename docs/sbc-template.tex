@@ -37,7 +37,8 @@
   cliente transmita dados continuamente durante um intervalo definido e o
   servidor contabilize os bytes recebidos em cada conexão. Realizaram-se
   experimentos com 1 a 10 clientes simultâneos em três cenários, sendo eles
-  \textit{loopback}, rede local cabeada e rede sem fio. Na rede cabeada, a taxa
+  \textit{loopback}, rede local cabeada (Ethernet) e rede local sem fio (Wi-Fi).
+  No cenário Ethernet, a taxa
   agregada cresceu até saturar em cerca de 941~Mbps, limite do enlace Gigabit
   Ethernet, enquanto no Wi-Fi permaneceu entre 60 e 90~Mbps, independentemente
   do número de clientes. Já no \textit{loopback}, a taxa atingiu 180~Gbps com
@@ -81,7 +82,7 @@ usuário, e para que o servidor contabilize os bytes efetivamente recebidos em
 cada conexão e calcule a taxa de transmissão agregada. Com essas alterações,
 foram realizados experimentos com 1 a 10 clientes simultâneos em três cenários,
 sendo eles a comunicação local na própria máquina (\textit{loopback}), uma rede
-local cabeada e uma rede local sem fio. Assim, busca-se compreender como o
+local cabeada (Ethernet) e uma rede local sem fio (Wi-Fi). Assim, busca-se compreender como o
 aumento do número de clientes afeta a capacidade de transmissão do servidor e
 identificar quais fatores limitam o desempenho em cada cenário.
 
@@ -195,9 +196,12 @@ cliente e servidor foram executados no mesmo computador (D15-126), de modo que
 os dados não passam por nenhuma placa de rede e o desempenho depende apenas do
 processador, da memória e da pilha TCP do sistema operacional. Já nos dois
 cenários de rede local, o servidor foi executado no D15-126 e todas as conexões
-partiram do ANVS14. Na rede cabeada, as máquinas foram ligadas por Ethernet
+partiram do ANVS14. O termo rede local (LAN, do inglês \textit{Local Area
+Network}) abrange tanto conexões cabeadas quanto sem fio; neste trabalho, os
+dois cenários são identificados pelo meio de conexão: Ethernet e Wi-Fi.
+No cenário Ethernet, as máquinas foram ligadas por Ethernet
 Gigabit, com enlace de 1~Gbps, na mesma sub-rede e sem roteador intermediário,
-enquanto na rede sem fio a comunicação ocorreu por Wi-Fi.
+enquanto no cenário Wi-Fi a comunicação utilizou a rede local sem fio.
 % TODO: indicar qual máquina estava no Wi-Fi e o tipo de rede (ex.: roteador doméstico).
 
 Nos cenários de rede local, o tráfego também passou pelo encaminhamento entre o
@@ -263,8 +267,8 @@ média obtida em cada cenário para 1 a 10 clientes simultâneos, enquanto a
 Figura~\ref{fig:maximo} mostra a taxa máxima em escala logarítmica, necessária
 porque os cenários diferem em várias ordens de grandeza. De modo geral, o
 comportamento observado dependeu menos do servidor e mais do recurso que
-limitava a transmissão em cada cenário, isto é, o enlace físico na rede
-cabeada, o meio sem fio no Wi-Fi e o processador no \textit{loopback}.
+limitava a transmissão em cada cenário, isto é, o enlace Ethernet,
+o meio sem fio no cenário Wi-Fi e o processador no \textit{loopback}.
 
 \begin{table}[ht]
 \centering
@@ -274,7 +278,7 @@ clientes simultâneos ($N$).}
 \small
 \begin{tabular}{crrrrrr}
 \hline
- & \multicolumn{2}{c}{\textbf{Loopback}} & \multicolumn{2}{c}{\textbf{Rede cabeada}} & \multicolumn{2}{c}{\textbf{Wi-Fi}} \\
+ & \multicolumn{2}{c}{\textbf{Loopback}} & \multicolumn{2}{c}{\textbf{Ethernet}} & \multicolumn{2}{c}{\textbf{Wi-Fi}} \\
 $N$ & Máx. & Média & Máx. & Média & Máx. & Média \\
 \hline
 1  & 50\,743  & 49\,375  & 209,5 & 202,9 & 83,5 & 61,2 \\
@@ -299,9 +303,9 @@ nos três cenários, em escala logarítmica.}
 \label{fig:maximo}
 \end{figure}
 
-\subsection{Rede cabeada}
+\subsection{Rede local cabeada (Ethernet)}
 
-Na rede cabeada, a taxa agregada cresceu de forma aproximadamente proporcional
+No cenário Ethernet, a taxa agregada cresceu de forma aproximadamente proporcional
 ao número de clientes até três conexões, passando de cerca de 203~Mbps para
 744~Mbps em média. A partir de quatro clientes, contudo, a taxa estabilizou em
 torno de 941~Mbps, com variação inferior a 2~Mbps entre as repetições, como
@@ -317,7 +321,7 @@ físico.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.8\textwidth]{figs/comparacao_lan_media.png}
-\caption{Taxa de transmissão agregada média nas redes cabeada e sem fio, com
+\caption{Taxa de transmissão agregada média nos cenários Ethernet e Wi-Fi, com
 intervalo de confiança de 95\%.}
 \label{fig:lan}
 \end{figure}
@@ -334,11 +338,11 @@ entretanto, as conexões passaram a disputar a mesma banda e a divisão entre
 elas tornou-se desigual, chegando a um caso em que a conexão mais lenta recebeu
 cerca de um terço da taxa da mais rápida.
 
-\subsection{Rede sem fio}
+\subsection{Rede local sem fio (Wi-Fi)}
 
 No cenário Wi-Fi, a taxa média permaneceu entre 61 e 81~Mbps para qualquer
 número de clientes, e o maior valor observado foi de 91,6~Mbps, com nove
-clientes. Diferentemente da rede cabeada, o aumento do número de conexões não
+clientes. Diferentemente do cenário Ethernet, o aumento do número de conexões não
 elevou a taxa agregada, pois o meio sem fio já era o gargalo desde o primeiro
 cliente. Nesse tipo de rede, o canal é compartilhado, os dispositivos não
 transmitem e recebem ao mesmo tempo, e a taxa efetiva depende da qualidade do
@@ -383,7 +387,7 @@ representa a capacidade da máquina como um todo, e não apenas a do servidor.
 
 Em conjunto, os resultados mostram que o efeito do aumento do número de
 clientes depende do recurso que limita a transmissão. Quando o limite está em
-cada conexão individualmente, como na rede cabeada com poucos clientes,
+cada conexão individualmente, como no cenário Ethernet com poucos clientes,
 adicionar conexões aumenta a taxa agregada até que um recurso compartilhado,
 como o enlace, se esgote. Por outro lado, quando o recurso compartilhado já
 está saturado, como no Wi-Fi, mais clientes apenas dividem a mesma capacidade.
@@ -393,7 +397,7 @@ como no \textit{loopback}, o desempenho pode até piorar.
 Em nenhum dos cenários de rede local o servidor foi o gargalo, já que, no
 \textit{loopback}, ele recebeu dados a taxas mais de cem vezes maiores. Desse
 modo, a capacidade efetiva máxima de transmissão observada foi de
-aproximadamente 941~Mbps na rede cabeada, limitada pelo enlace Gigabit, e de
+aproximadamente 941~Mbps no cenário Ethernet, limitado pelo enlace Gigabit, e de
 cerca de 90~Mbps no Wi-Fi, limitada pelo meio sem fio. Por fim, os resultados
 devem ser interpretados considerando algumas limitações do experimento, como o
 uso de uma única máquina para gerar todas as conexões, o encaminhamento
