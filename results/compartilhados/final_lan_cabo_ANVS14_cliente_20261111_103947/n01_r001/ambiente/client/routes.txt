@@ -1,0 +1,3 @@
+Comando: ip route
+default via 172.20.128.1 dev eth0 proto kernel 
+172.20.128.0/20 dev eth0 proto kernel scope link src 172.20.131.6 
