@@ -26,7 +26,7 @@ bash scripts/run_experiments.sh loopback --machine-id pc_a --clients 1,2,3,4,5,6
 bash scripts/run_experiments.sh loopback --machine-id pc_a --output results/loopback_pc_a
 ```
 
-Padrao: N de 1 a 10 em ordem crescente, dez repeticoes por N, 30 segundos, bloco fixo de 65.536 bytes, descartes de cinco segundos no inicio e no fim e intervalo de cinco segundos entre rodadas. Aproximadamente uma hora por campanha. Os parametros podem ser consultados com `bash scripts/run_experiments.sh --help`. O diretorio de saida deve ser novo.
+Padrao: N de 1 a 10 em ordem crescente, cinco repeticoes por N (50 rodadas), 30 segundos, bloco fixo de 65.536 bytes, descartes de cinco segundos no inicio e no fim e intervalo de cinco segundos entre rodadas. Aproximadamente 30 minutos por campanha. `--repetitions` permite escolher outra quantidade. Os parametros podem ser consultados com `bash scripts/run_experiments.sh --help`. O diretorio de saida deve ser novo.
 
 Use um ID estavel para cada maquina, por exemplo `pc_a` e `pc_b`. Sem `--machine-id`, o ID e o hostname. Para executar loopback na segunda maquina, use `--machine-id pc_b` e outra pasta, como `results/loopback_pc_b`. No loopback, cliente e servidor recebem o mesmo ID. `config.json` registra tambem o hostname e o sistema local; os CSVs consolidados e a analise preservam os IDs de cliente e servidor.
 
@@ -79,7 +79,9 @@ O servidor conta apenas carga util recebida, excluindo nomes e controle. A formu
 
 `Mbps = 8 * bytes_window / (window_s * 1.000.000)`
 
-As amostras sao cumulativas por segundo. A janela usa a diferenca entre o contador no fim e no inicio dos descartes. Sua duracao efetiva esta em `window_s`; nao se presume exatamente 20 segundos. A amostragem depende do escalonamento do sistema. Um send bloqueado pode ultrapassar a duracao solicitada; o executor aplica um prazo externo.
+As amostras sao cumulativas, com coleta programada a cada segundo. `tick_s` identifica o segundo programado; `elapsed_s` registra, com CLOCK_MONOTONIC, o instante real ao concluir a leitura dos contadores. Os descartes selecionam os ticks inicial e final; a janela usa a diferenca dos contadores nesses ticks e sua duracao efetiva, calculada pela diferenca entre os respectivos `elapsed_s` (ou desde t0 quando warmup=0). Assim, atrasos de escalonamento nao sao tratados como segundos exatos. A leitura dos contadores de todas as conexoes e sequencial, portanto permanece uma pequena incerteza durante cada snapshot. Um send bloqueado pode ultrapassar a duracao solicitada; o executor aplica um prazo externo.
+
+Novas campanhas registram `sample_timing=monotonic` em config.json. Campanhas antigas sem `elapsed_s` continuam legiveis usando os segundos nominais originais; nao e possivel recuperar retroativamente seus instantes reais. Os resultados antigos sao preservados.
 
 ## Saidas e falhas
 
@@ -114,7 +116,7 @@ python3 scripts/analyze.py results/loopback_pc_a --output results/loopback_pc_a/
 python3 scripts/analyze.py results/loopback_pc_a results/loopback_pc_b results/cabo_servidor_pc_a results/cabo_servidor_pc_b --output results/comparacao
 ```
 
-O diretorio de analise deve estar vazio ou nao existir. Campanhas com duracoes, blocos ou descartes diferentes sao rejeitadas. Cada campanha permanece identificada, mesmo quando usa o mesmo tipo de rede.
+O diretorio de analise deve estar vazio ou nao existir. Campanhas com duracoes, blocos, descartes ou metodos de tempo diferentes sao rejeitadas; analise campanhas antigas e novas separadamente. Cada campanha permanece identificada, mesmo quando usa o mesmo tipo de rede.
 
 Saidas:
 

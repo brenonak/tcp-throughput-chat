@@ -1,0 +1,9 @@
+[server] escutando na porta 5000, esperando 6 clientes...
+[server] cliente 1/6 registrado: cliente_2
+[server] cliente 2/6 registrado: cliente_5
+[server] cliente 3/6 registrado: cliente_1
+[server] cliente 4/6 registrado: cliente_6
+[server] cliente 5/6 registrado: cliente_3
+[server] todas as conexoes aceitas, aguardando nomes...
+[server] cliente 6/6 registrado: cliente_4
+[server] START medicao iniciada

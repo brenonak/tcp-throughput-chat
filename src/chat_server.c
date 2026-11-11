@@ -49,6 +49,7 @@ static struct timespec g_t_start;
 
 /* Snapshot por segundo: samples[tick][i] = bytes do cliente i no tick. */
 static uint64_t g_samples[MAX_SAMPLES][MAX_CLIENTS];
+static double g_sample_elapsed[MAX_SAMPLES];
 static int g_samples_count = 0;
 static _Atomic int g_measurement_active = 0;
 
@@ -185,6 +186,9 @@ static void *sampler(void *arg) {
                 &g_clients[i]->bytes_received,
                 memory_order_relaxed);
         }
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        g_sample_elapsed[tick] = tdiff(&g_t_start, &now);
         g_samples_count++;
     }
     return NULL;
@@ -225,7 +229,7 @@ static void write_summary(double total_s, double window_s,
     strftime(ts, sizeof(ts), "%Y-%m-%dT%H:%M:%S", &tm);
 
     fprintf(f,
-        "%s,%s,%d,%d,%d,%.3f,%" PRIu64 ",%" PRIu64 ",%.3f,%.3f,%.3f\n",
+        "%s,%s,%d,%d,%d,%.3f,%" PRIu64 ",%" PRIu64 ",%.9f,%.3f,%.3f\n",
         ts, g_label, g_rep_id, g_n_expected, g_block_bytes,
         total_s, bytes_total, bytes_window, window_s,
         mbps_total, mbps_window);
@@ -243,7 +247,7 @@ static void write_samples(void) {
      */
     ensure_header(g_samples_path,
         "timestamp,label,rep,n_clients,tick_s,client_index,client_name,"
-        "bytes_cumulative");
+        "bytes_cumulative,elapsed_s");
 
     FILE *f = fopen(g_samples_path, "a");
     if (!f) {
@@ -261,10 +265,10 @@ static void write_samples(void) {
     for (int t = 0; t < g_samples_count; t++) {
         for (int i = 0; i < g_num_registered; i++) {
             fprintf(f,
-                "%s,%s,%d,%d,%d,%d,%s,%" PRIu64 "\n",
+                "%s,%s,%d,%d,%d,%d,%s,%" PRIu64 ",%.9f\n",
                 ts, g_label, g_rep_id, g_n_expected,
                 t + 1, i, g_clients[i]->name,
-                g_samples[t][i]);
+                g_samples[t][i], g_sample_elapsed[t]);
         }
     }
 
@@ -302,7 +306,7 @@ static void compute_and_report(const struct timespec *t_end) {
      *
      * Convencoes:
      *   samples[k][i] = bytes do cliente i registrados na amostra k+1,
-     *                   ou seja, imediatamente apos o segundo (k+1) da medicao.
+     *                   com instante real em g_sample_elapsed[k].
      *   samples_at(0) = 0 (nada enviado ainda em t=0).
      *   samples_at(t) = samples[t-1] para t >= 1, saturando no ultimo tick.
      *
@@ -326,7 +330,8 @@ static void compute_and_report(const struct timespec *t_end) {
                 uint64_t b = g_samples[end_s - 1][i];
                 bytes_window += (b - a);
             }
-            window_s = (double)(end_s - start_s);
+            window_s = g_sample_elapsed[end_s - 1]
+                     - (start_s > 0 ? g_sample_elapsed[start_s - 1] : 0.0);
         }
     }
 

@@ -16,7 +16,7 @@ import sys
 import time
 from datetime import datetime, timezone
 
-from metrics import SUMMARY, SAMPLES, IDENTITY, MANIFEST, validate_round
+from metrics import SUMMARY, SAMPLES, SAMPLE_TIMING, IDENTITY, MANIFEST, validate_round
 from monitoring import RoundMonitor
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,7 +106,7 @@ def main():
     p.add_argument('--label', choices=['loopback', 'lan_cabo', 'lan_wifi'])
     p.add_argument('--port', type=int, default=5000)
     p.add_argument('--duration', type=int, default=30)
-    p.add_argument('--repetitions', type=int, default=10)
+    p.add_argument('--repetitions', type=int, default=5)
     p.add_argument('--clients', default='1,2,3,4,5,6,7,8,9,10')
     p.add_argument('--warmup', type=int, default=5)
     p.add_argument('--cooldown', type=int, default=5)
@@ -150,6 +150,7 @@ def main():
     print(f'Maquinas: servidor={identity["server_machine_id"]}, cliente={identity["client_machine_id"]}', flush=True)
     config = vars(args).copy()
     config.update(output=str(out), clients=sorted(ns), label=label, block_bytes=65536,
+                  sample_timing='monotonic',
                   **identity,
                   machine={'id': args.machine_id, 'hostname': socket.gethostname(),
                            'system': platform.system(), 'release': platform.release(),
@@ -210,7 +211,7 @@ def main():
                     raise RuntimeError('Servidor ou cliente terminou com erro')
                 row, samples, _ = validate_round(directory, config, n, rep)
                 append_csv(out / 'results.csv', SUMMARY + IDENTITY, [dict(row, **identity)])
-                append_csv(out / 'samples.csv', SAMPLES + IDENTITY, [dict(sample, **identity) for sample in samples])
+                append_csv(out / 'samples.csv', SAMPLES + SAMPLE_TIMING + IDENTITY, [dict(sample, **identity) for sample in samples])
                 entry['status'] = 'valid'
             except BaseException as exc:
                 entry['reason'] = str(exc) or type(exc).__name__

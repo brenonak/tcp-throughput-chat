@@ -11,10 +11,70 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from metrics import SUMMARY, SAMPLES, IDENTITY, MANIFEST, validate_round
+from metrics import SUMMARY, SAMPLES, SAMPLE_TIMING, IDENTITY, MANIFEST, validate_round
 
 
 class MetricsTests(unittest.TestCase):
+    def test_delayed_samples_use_real_time_and_validate_timestamps(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            config = dict(label='loopback', duration=4, warmup=1, cooldown=1,
+                          sample_timing='monotonic')
+            with (directory / 'results.csv').open('w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(SUMMARY)
+                writer.writerow(['now', 'loopback', 1, 2, 65536, 4.5,
+                                 10000000, 4000000, 2.3, 17.778, 13.913])
+            samples = [['now', 'loopback', 1, 2, tick, i, f'cliente_{i}',
+                        tick * 1000000, elapsed]
+                       for tick, elapsed in enumerate([1.1, 2.2, 3.4, 4.4], 1)
+                       for i in range(2)]
+
+            def write_samples(rows, timed=True):
+                with (directory / 'samples.csv').open('w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(SAMPLES + (SAMPLE_TIMING if timed else []))
+                    writer.writerows(rows)
+
+            write_samples(samples)
+            row, _, individual = validate_round(directory, config, 2, 1)
+            self.assertEqual(float(row['window_s']), 2.3)
+            self.assertAlmostEqual(sum(r['mbps'] for r in individual), 32 / 2.3)
+            self.assertAlmostEqual(individual[0]['mbps'], 16 / 2.3)
+            for invalid in (float('nan'), float('inf'), 0, -1, 1.0, 3.5):
+                with self.subTest(invalid=invalid):
+                    broken = [r.copy() for r in samples]
+                    # Both clients must agree on each instant, and ticks must increase.
+                    broken[2][-1] = broken[3][-1] = invalid
+                    write_samples(broken)
+                    with self.assertRaises(ValueError):
+                        validate_round(directory, config, 2, 1)
+            broken = [r.copy() for r in samples]
+            broken[1][-1] = 1.2
+            write_samples(broken)
+            with self.assertRaisesRegex(ValueError, 'inconsistente'):
+                validate_round(directory, config, 2, 1)
+            write_samples([r[:-1] for r in samples], timed=False)
+            with self.assertRaisesRegex(ValueError, 'ausentes'):
+                validate_round(directory, config, 2, 1)
+
+    def test_real_window_without_warmup(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            with (directory / 'results.csv').open('w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(SUMMARY)
+                writer.writerow(['now', 'loopback', 1, 1, 65536, 4.5,
+                                 5000000, 3000000, 3.4, 8.889, 7.059])
+            with (directory / 'samples.csv').open('w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(SAMPLES + SAMPLE_TIMING)
+                for tick, elapsed in enumerate([1.1, 2.2, 3.4, 4.4], 1):
+                    writer.writerow(['now', 'loopback', 1, 1, tick, 0, 'cliente', tick * 1000000, elapsed])
+            _, _, individual = validate_round(directory, dict(label='loopback', duration=4,
+                warmup=0, cooldown=1, sample_timing='monotonic'), 1, 1)
+            self.assertAlmostEqual(individual[0]['mbps'], 24 / 3.4)
+
     def test_known_window_and_corruption(self):
         with tempfile.TemporaryDirectory() as tmp:
             directory = Path(tmp)
@@ -185,6 +245,20 @@ class AnalysisTests(unittest.TestCase):
 
 
 class RunnerTests(unittest.TestCase):
+    def test_default_campaign_has_five_repetitions(self):
+        from experiments import main
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / 'campaign'
+            with patch.object(sys, 'argv', ['experiments.py', 'loopback', '--output', str(out)]), \
+                    patch('experiments.subprocess.run', side_effect=RuntimeError('before build')):
+                with self.assertRaisesRegex(RuntimeError, 'before build'):
+                    main()
+            config = json.loads((out / 'config.json').read_text())
+            self.assertEqual(config['repetitions'], 5)
+            self.assertEqual(len(config['order']), 50)
+            self.assertEqual(config['sample_timing'], 'monotonic')
+
     def test_machine_identity_validation(self):
         from experiments import identify_machines, machine_id
         import argparse
@@ -218,11 +292,14 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(config['machine']['hostname'], socket.gethostname())
             self.assertEqual(config['server_machine_id'], 'pc_a')
             self.assertEqual(config['client_machine_id'], 'pc_a')
+            self.assertEqual(config['sample_timing'], 'monotonic')
             for filename in ('results.csv', 'samples.csv', 'manifest.csv'):
                 with (out / filename).open() as f:
                     rows = list(csv.DictReader(f))
                 self.assertTrue(rows)
                 self.assertTrue(all(r['server_machine_id'] == r['client_machine_id'] == 'pc_a' for r in rows))
+                if filename == 'samples.csv':
+                    self.assertTrue(all(float(r['elapsed_s']) > 0 for r in rows))
             validate_round(out / 'rodadas/n01_r001', config, 1, 1)
             directory = out / 'rodadas/n01_r001'
             with (directory / 'cpu.csv').open() as f:

@@ -46,7 +46,7 @@ def main():
         identity = campaign_identity(config)
         if 'nao_informado' in identity.values():
             warnings.append(f'{campaign.name}: campanha antiga sem identificacao completa das maquinas')
-        signature = tuple(config[k] for k in ('duration', 'warmup', 'cooldown', 'block_bytes'))
+        signature = tuple(config[k] for k in ('duration', 'warmup', 'cooldown', 'block_bytes')) + (config.get('sample_timing', 'nominal'),)
         if baseline is not None and signature != baseline:
             p.error('Campanhas possuem parametros incompativeis')
         baseline = signature

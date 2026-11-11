@@ -1,0 +1,2 @@
+Comando: git -C /mnt/c/Users/navet/OneDrive/Estvn/Documentos/repos/tcp-throughput-chat/scripts/.. rev-parse HEAD
+1197409d78a66de8252d17d02ab295fb727dc227
