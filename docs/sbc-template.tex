@@ -51,9 +51,9 @@
 
 A taxa de transferência efetiva de uma aplicação em rede depende não apenas da
 capacidade do enlace físico, mas também da forma como a aplicação utiliza os
-recursos oferecidos pelo sistema operacional. Nesse contexto, este trabalho tem
+recursos oferecidos pelo sistema operacional~\cite{kurose:21,tanenbaum:21}. Nesse contexto, este trabalho tem
 como objetivo avaliar a capacidade máxima de transmissão de dados dos clientes
-para o servidor em uma aplicação de chat baseada em \textit{sockets} TCP,
+para o servidor em uma aplicação de chat baseada em \textit{sockets} TCP~\cite{rfc9293,stevens:03},
 medindo a taxa de transmissão agregada recebida pelo servidor à medida que o
 número de clientes simultâneos varia de 1 a 10.
 
@@ -73,7 +73,7 @@ dados depende da digitação manual, o que torna o volume transmitido pequeno e
 irregular. Além disso, a leitura byte a byte exige uma chamada ao sistema
 operacional para cada caractere recebido, e o repasse das mensagens a todos os
 clientes, protegido por um único \textit{mutex} global, multiplica o tráfego e
-serializa o trabalho das \textit{threads}. Por fim, a aplicação não registra a
+serializa o trabalho das \textit{threads}~\cite{stevens:03,kerrisk:10}. Por fim, a aplicação não registra a
 quantidade de dados recebidos nem o tempo de transmissão, de forma que não há
 como calcular a taxa alcançada.
 
@@ -114,7 +114,7 @@ Após estabelecer a conexão, cada \textit{thread} envia um nome de identificaç
 mantendo o protocolo do chat original, e aguarda uma mensagem de início enviada
 pelo servidor. Somente após recebê-la a \textit{thread} começa a transmitir,
 enviando repetidamente um bloco de 64~KiB até que o tempo definido se esgote, o
-que é verificado por um relógio monotônico do sistema. Ao final, a
+que é verificado por um relógio monotônico do sistema~\cite{kerrisk:10}. Ao final, a
 \textit{thread} encerra a conexão. Como o conteúdo dos dados não importa para a
 medição, o bloco é preenchido uma única vez antes do envio, o que evita qualquer
 processamento adicional durante a transmissão e faz com que o cliente se dedique
@@ -247,13 +247,14 @@ final da janela de medição. O fator 8 converte bytes em bits, e a divisão por
 $10^6$ expressa o resultado em Mbps.
 
 Os primeiros e os últimos 5 segundos de cada rodada foram descartados, pois no
-início o TCP ainda está aumentando sua taxa de envio e, no fim, as conexões são
+início o controle de congestionamento do TCP (CUBIC) ainda está aumentando sua
+taxa de envio~\cite{ha:08,rfc9293} e, no fim, as conexões são
 encerradas em instantes ligeiramente diferentes. Assim, a janela de medição
 corresponde a aproximadamente 20 segundos de transmissão estável, e os
 instantes $t_i$ e $t_f$ são os valores reais registrados pelo relógio do
 servidor, e não valores nominais. Além disso, apenas os dados da aplicação são
 contabilizados, sem os cabeçalhos dos protocolos nem as mensagens de controle,
-de modo que a taxa medida corresponde à vazão útil (\textit{goodput}).
+de modo que a taxa medida corresponde à vazão útil (\textit{goodput})~\cite{kurose:21}.
 
 Por fim, para cada quantidade de clientes, considerou-se como
 \textit{throughput} agregado máximo o maior valor obtido entre as cinco
@@ -330,20 +331,21 @@ No cenário Ethernet, a taxa agregada cresceu de forma aproximadamente proporcio
 ao número de clientes até três conexões, passando de cerca de 203~Mbps para
 744~Mbps em média. A partir de quatro clientes, contudo, a taxa estabilizou em
 torno de 941~Mbps, com variação inferior a 2~Mbps entre as repetições, como
-mostra a Figura~\ref{fig:medias}(b). Esse valor coincide com o limite teórico de
-vazão útil do TCP em um enlace Gigabit Ethernet. Isso ocorre porque, embora o
-enlace transmita 1~Gbps, parte de cada quadro é ocupada pelos cabeçalhos
-Ethernet, IP e TCP e pelo intervalo obrigatório entre quadros, de modo que, com
-a MTU de 1492 bytes utilizada, apenas 1440 de cada 1530 bytes ocupados no meio
-são dados da aplicação, o que corresponde a aproximadamente 941~Mbps.
-Portanto, a partir de quatro clientes, o gargalo passou a ser o próprio enlace
-físico.
+mostra a Figura~\ref{fig:medias}(b). Esse resultado mostra que a comunicação
+por cabo chegou aproximadamente ao limite físico do cabo, pois o cabo utilizado
+é de 1~Gbps. Embora a capacidade nominal do cabo seja de 1~Gbps, parte de cada
+quadro é ocupada pelos cabeçalhos Ethernet, IP e TCP e pelo intervalo
+obrigatório entre quadros~\cite{tanenbaum:21,kurose:21}. Assim, com a MTU de 1492 bytes utilizada, apenas
+1440 de cada 1530 bytes ocupados no meio correspondem a dados da aplicação, o
+que limita a vazão útil (\textit{goodput}) teórica a aproximadamente 941~Mbps.
+Portanto, a partir de quatro clientes, o gargalo passou a ser o próprio limite
+físico do cabo de rede.
 
 Por outro lado, com poucos clientes, cada conexão alcançou apenas cerca de 200
 a 250~Mbps, bem abaixo da capacidade do enlace, como mostra a
 Figura~\ref{fig:conexao}(b). Como os \textit{buffers} TCP
 das máquinas são grandes em relação ao baixo atraso de uma rede local, é pouco
-provável que esse limite se deva ao controle de fluxo do TCP. A explicação mais
+provável que esse limite se deva ao controle de fluxo do TCP~\cite{rfc9293}. A explicação mais
 provável é o encaminhamento entre o Windows e o WSL, que possivelmente processa
 cada conexão de forma individual e impõe um limite de taxa por conexão. Dessa
 forma, o aumento do número de clientes foi justamente o que permitiu somar as
@@ -361,7 +363,7 @@ elevou a taxa agregada, pois o meio sem fio já era o gargalo desde o primeiro
 cliente. Nesse tipo de rede, o canal é compartilhado, os dispositivos não
 transmitem e recebem ao mesmo tempo, e a taxa efetiva depende da qualidade do
 sinal, de interferências e de retransmissões, o que resulta em uma capacidade
-bem inferior à nominal. Por esse motivo, os resultados também foram os mais
+bem inferior à nominal~\cite{kurose:21,tanenbaum:21}. Por esse motivo, os resultados também foram os mais
 variáveis entre as repetições, como indicam os amplos intervalos de confiança
 da Figura~\ref{fig:medias}(c). Além disso, a taxa de cada conexão diminuiu à
 medida que a mesma banda foi dividida entre mais clientes, e essa divisão foi a
@@ -379,7 +381,7 @@ desse esvaziamento.
 No \textit{loopback}, os dados não atravessam nenhuma placa de rede, de modo
 que a transmissão consiste basicamente em cópias de memória realizadas pelo
 sistema operacional, primeiro do cliente para o espaço do sistema e, depois,
-deste para o servidor. Por isso, as taxas foram muito superiores às das redes
+deste para o servidor~\cite{stevens:03,kerrisk:10}. Por isso, as taxas foram muito superiores às das redes
 locais, chegando a 180,8~Gbps no máximo e a 176,3~Gbps em média com cinco
 clientes. Até três clientes, a taxa cresceu de forma praticamente linear, com
 cerca de 49~Gbps por conexão, o que indica que cada conexão dispunha de
@@ -398,7 +400,7 @@ processador, e, a partir de oito clientes, o número de \textit{threads} supera
 os 16 processadores lógicos disponíveis. Assim, as \textit{threads} passam a
 compartilhar núcleos, a utilizar os núcleos de eficiência, mais lentos, e a ser
 alternadas pelo escalonador, o que aumenta o custo de troca de contexto e reduz
-o aproveitamento da memória \textit{cache}. Vale ressaltar que, nesse cenário,
+o aproveitamento da memória \textit{cache}~\cite{kerrisk:10}. Vale ressaltar que, nesse cenário,
 o cliente compete com o servidor pelos mesmos recursos, de modo que o resultado
 representa a capacidade da máquina como um todo, e não apenas a do servidor.
 
@@ -415,15 +417,17 @@ como no \textit{loopback}, o desempenho pode até piorar.
 
 Em nenhum dos cenários de rede local o servidor foi o gargalo, já que, no
 \textit{loopback}, ele recebeu dados a taxas mais de cem vezes maiores. Desse
-modo, a capacidade efetiva máxima de transmissão observada foi de
-aproximadamente 941~Mbps no cenário Ethernet, limitado pelo enlace Gigabit, e de
-cerca de 90~Mbps no Wi-Fi, limitada pelo meio sem fio. Por fim, os resultados
+modo, no cenário cabeado (Ethernet), a taxa de transmissão atingiu
+aproximadamente 941~Mbps, chegando aproximadamente ao limite físico do cabo,
+pois o cabo utilizado é de 1~Gbps (descontada a sobrecarga dos cabeçalhos de
+protocolo). Já no Wi-Fi, a capacidade efetiva máxima observada foi de cerca de
+90~Mbps, limitada pelo meio sem fio. Por fim, os resultados
 devem ser interpretados considerando algumas limitações do experimento, como o
 uso de uma única máquina para gerar todas as conexões, o encaminhamento
 adicional imposto pelo WSL e o número reduzido de cinco repetições por cenário.
 
 
-% \bibliographystyle{sbc}
-% \bibliography{sbc-template}
+\bibliographystyle{sbc}
+\bibliography{sbc-template}
 
 \end{document}

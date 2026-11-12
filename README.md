@@ -1,10 +1,19 @@
 # Chat TCP Throughput
 
-Experimentos de vazao agregada recebida por um servidor TCP com 1 a 10 conexoes simultaneas. Cada conexao corresponde a uma thread do programa cliente. Nao sao necessarios dez computadores.
+Experimentos de vazão agregada recebida por um servidor TCP com 1 a 10 conexões simultâneas, a partir de uma aplicação de chat multithread modificada para geração contínua de carga e medição de *goodput*. Cada conexão corresponde a uma *thread* do programa cliente, dispensando o uso de dez computadores físicos.
 
-## Preparacao no Ubuntu ou WSL
+## Estrutura do repositório
 
-Execute os comandos Linux no terminal Ubuntu, na raiz deste repositorio:
+- `original/`: código-fonte original da aplicação de chat (`chat_server.c` e `chat_client.c`), preservado sem modificações.
+- `src/`: versão instrumentada do servidor e do cliente para geração de carga, sincronização de início e medição de vazão.
+- `scripts/`: automação das campanhas (`run_experiments.sh`, `experiments.py`), validação de rodadas (`metrics.py`), monitoramento de CPU e rede (`monitoring.py`), coleta de ambiente (`coleta_ambiente.sh`) e geração de estatísticas e gráficos (`analyze.py`).
+- `tests/`: testes automatizados do protocolo de sincronização, validação de amostras e cálculo de métricas.
+- `docs/`: relatório técnico no formato SBC (`sbc-template.tex`, `sbc-template.pdf` e figuras em `docs/figs/`). Os artefatos temporários de compilação do LaTeX (`.aux`, `.bbl`, `.blg`, `.fdb_latexmk`, `.fls`, `.log`, `.synctex.gz`, entre outros) são ignorados pelo `.gitignore`.
+- `results/compartilhados/`: campanhas experimentais validadas (`loopback`, `lan_cabo` e `lan_wifi`), comparativos consolidados e painel completo de análises (`analises_completas_20261111/`).
+
+## Preparação no Ubuntu ou WSL
+
+Execute os comandos Linux no terminal Ubuntu, na raiz deste repositório:
 
 ```bash
 sudo apt update
@@ -16,7 +25,7 @@ make
 make test
 ```
 
-Os binarios ficam em `build/`. Flags: `-O2 -Wall -Wextra -pthread`. Os fontes originais permanecem em `original/`. A analise precisa das bibliotecas Python; compilacao, execucao e validacao dos CSVs usam apenas ferramentas do sistema e a biblioteca padrao Python.
+Os binários compilados ficam em `build/`. As *flags* utilizadas são `-O2 -Wall -Wextra -pthread`. A compilação, a execução das campanhas e a validação dos CSVs usam apenas ferramentas do sistema e a biblioteca padrão do Python; o ambiente virtual com `pandas` e `matplotlib` é utilizado por `scripts/analyze.py`.
 
 ## Piloto e campanha em loopback
 
@@ -26,105 +35,103 @@ bash scripts/run_experiments.sh loopback --machine-id pc_a --clients 1,2,3,4,5,6
 bash scripts/run_experiments.sh loopback --machine-id pc_a --output results/loopback_pc_a
 ```
 
-Padrao: N de 1 a 10 em ordem crescente, cinco repeticoes por N (50 rodadas), 30 segundos, bloco fixo de 65.536 bytes, descartes de cinco segundos no inicio e no fim e intervalo de cinco segundos entre rodadas. Aproximadamente 30 minutos por campanha. `--repetitions` permite escolher outra quantidade. Os parametros podem ser consultados com `bash scripts/run_experiments.sh --help`. O diretorio de saida deve ser novo.
+Configuração padrão: $N$ de 1 a 10 em ordem crescente, cinco repetições por $N$ (50 rodadas), 30 segundos por rodada, bloco fixo de 65.536 bytes (64 KiB), descartes de cinco segundos no início e no fim e intervalo de cinco segundos entre rodadas (aproximadamente 30 minutos por campanha). O argumento `--repetitions` permite escolher outra quantidade. Os parâmetros podem ser consultados com `bash scripts/run_experiments.sh --help`. O diretório de saída deve ser novo.
 
-Use um ID estavel para cada maquina, por exemplo `pc_a` e `pc_b`. Sem `--machine-id`, o ID e o hostname. Para executar loopback na segunda maquina, use `--machine-id pc_b` e outra pasta, como `results/loopback_pc_b`. No loopback, cliente e servidor recebem o mesmo ID. `config.json` registra tambem o hostname e o sistema local; os CSVs consolidados e a analise preservam os IDs de cliente e servidor.
+Use um identificador estável para cada máquina (por exemplo, `D15-126` e `ANVS14`, ou `pc_a` e `pc_b`). Sem `--machine-id`, utiliza-se o *hostname*. No *loopback*, cliente e servidor recebem o mesmo identificador. O arquivo `config.json` registra também o *hostname* e o sistema local, enquanto os CSVs consolidados e a análise preservam os identificadores de cliente e servidor.
 
-## Dois computadores na rede local
+## Dois computadores na rede local (Ethernet e Wi-Fi)
 
-Use a mesma revisao do repositorio nas duas maquinas, com as dependencias instaladas. Computador A executa o servidor; computador B executa todas as conexoes clientes. Os programas C continuam usando a mesma interface em loopback e LAN.
+Use a mesma revisão do repositório nas duas máquinas, com as dependências instaladas. O computador A executa o servidor e o computador B executa todas as conexões clientes. Os programas em C utilizam a mesma interface em *loopback*, rede cabeada (Ethernet) e rede sem fio (Wi-Fi).
 
-Identifique o IPv4 acessivel do servidor com `ip -4 addr` e a interface com `ip route`. Exemplo: IP 192.168.1.20, interface eth0. Os computadores precisam conseguir se comunicar pela porta TCP 5000. Se houver firewall ativo, configure a liberacao dessa porta para a rede utilizada.
+Identifique o endereço IPv4 acessível do servidor com `ip -4 addr` e a interface com `ip route` (por exemplo: IP `192.168.1.20`, interface `eth0`). Os computadores precisam se comunicar pela porta TCP 5000. Se houver *firewall* ativo, libere essa porta para a rede utilizada.
 
-No WSL, o endereco interno pode nao ser acessivel por outra maquina. Valide a conectividade antes da campanha e ajuste a rede do Windows/WSL quando necessario. Uma alternativa e usar Linux nativo para o servidor. Redes Wi-Fi com isolamento entre clientes tambem podem impedir a comunicacao.
+No WSL2, valide a conectividade entre as máquinas antes de iniciar a campanha e configure o encaminhamento de rede entre Windows e WSL quando necessário. Redes Wi-Fi com isolamento entre clientes também podem bloquear a comunicação direta.
 
-No computador A:
+No computador servidor (A):
 
 ```bash
 bash scripts/run_experiments.sh server --machine-id pc_a --client-machine-id pc_b --ip 192.168.1.20 --label lan_cabo --interface eth0 --output results/cabo_servidor_pc_a
 ```
 
-A cada rodada pronta, o executor mostra um comando para executar no computador B, na raiz do repositorio. Por exemplo:
+A cada rodada pronta, o executor exibe o comando correspondente para execução no computador cliente (B), na raiz do repositório. Por exemplo:
 
 ```bash
 bash scripts/run_experiments.sh client --machine-id pc_b --server-machine-id pc_a --ip 192.168.1.20 --port 5000 --duration 30 --clients 5 --rep 1 --label lan_cabo --interface eth0
 ```
 
-Execute somente o comando da rodada atual e espere o servidor indicar a proxima. O modo cliente compila seu binario, coleta seu ambiente e salva um log em um novo diretorio. Para coletar informacoes da interface uma unica vez:
+Execute somente o comando da rodada atual e aguarde o servidor indicar a próxima. O modo cliente compila seu binário, coleta seu ambiente e salva o registro da execução em um novo diretório. Para coletar informações da interface do cliente uma única vez:
 
 ```bash
 bash scripts/coleta_ambiente.sh results/ambiente_cliente eth0
 ```
 
-Copie essa pasta para `results/cabo_servidor_pc_a/ambiente/cliente` no servidor. Preserve tambem as pastas de cada rodada executada no cliente, que contem sua configuracao e monitoramento. Preencha `notas.txt` com cabo, switch/roteador, velocidade ou condicoes de Wi-Fi e outras cargas nas maquinas. Para Wi-Fi, use `--label lan_wifi` e outro diretorio. Mantenha o tipo de conexao fixo durante a campanha. SSH nao e necessario.
-
-Para inverter os papeis, inicie o modo servidor no computador B, usando o IPv4 e a interface dele. Por exemplo:
+Para o cenário sem fio (Wi-Fi), utilize `--label lan_wifi` e outro diretório de saída:
 
 ```bash
-bash scripts/run_experiments.sh server --machine-id pc_b --client-machine-id pc_a --ip 192.168.1.21 --label lan_cabo --interface eth0 --output results/cabo_servidor_pc_b
+bash scripts/run_experiments.sh server --machine-id pc_a --client-machine-id pc_b --ip 192.168.1.20 --label lan_wifi --interface eth0 --output results/wifi_servidor_pc_a
 ```
 
-Execute os comandos gerados no computador A. Os IDs da outra maquina sao declarados nos argumentos; nao ha verificacao automatica da identidade remota. Assim, as quatro campanhas sao loopback em A, loopback em B, LAN com servidor A e LAN com servidor B. Use os mesmos parametros experimentais nas quatro.
+Mantenha o meio de conexão fixo durante toda a campanha.
 
-## Protocolo e medicao
+## Protocolo e medição
 
-1. Cada thread cliente conecta, envia um nome terminado em nova linha e espera `GO\n`.
-2. O servidor espera todos os N nomes completos, marca t0 com CLOCK_MONOTONIC, prepara a amostradora e libera a recepcao.
-3. O servidor envia `GO\n` a todas as conexoes. Cada cliente inicia seu cronometro monotonic e transmite continuamente.
-4. Ao terminar o intervalo, os clientes fecham as conexoes. O servidor espera o fim de todas, calcula a vazao e salva os CSVs.
+1. Cada *thread* cliente conecta ao servidor, envia seu nome terminado em nova linha e aguarda `GO\n`.
+2. O servidor aguarda todos os $N$ nomes completos, registra $t_0$ com `CLOCK_MONOTONIC`, prepara a *thread* amostradora e libera a recepção.
+3. O servidor envia `GO\n` a todas as conexões. Cada cliente inicia seu cronômetro monotônico e transmite blocos continuamente.
+4. Ao terminar o intervalo, os clientes fecham as conexões. O servidor aguarda o encerramento de todas, calcula a vazão e grava os arquivos CSV.
 
-Atualize cliente e servidor juntos. As versoes antigas sem GO sao incompativeis. Nao e necessario sincronizar os relogios das maquinas. GO coordena a partida, mas nao chega exatamente ao mesmo tempo a todas as conexoes. O descarte inicial reduz esse efeito.
+Não é necessário sincronizar os relógios entre máquinas distintas, pois a medição ocorre integralmente no relógio monotônico do servidor. O descarte inicial (*warmup*) reduz o efeito de eventuais diferenças no instante de chegada do `GO\n` e do crescimento inicial da janela TCP.
 
-O servidor conta apenas carga util recebida, excluindo nomes e controle. A formula principal e:
+O servidor contabiliza apenas a carga útil recebida (*goodput*), excluindo os nomes iniciais, a mensagem de controle e os cabeçalhos TCP/IP/Ethernet. A taxa agregada é calculada por:
 
 `Mbps = 8 * bytes_window / (window_s * 1.000.000)`
 
-As amostras sao cumulativas, com coleta programada a cada segundo. `tick_s` identifica o segundo programado; `elapsed_s` registra, com CLOCK_MONOTONIC, o instante real ao concluir a leitura dos contadores. Os descartes selecionam os ticks inicial e final; a janela usa a diferenca dos contadores nesses ticks e sua duracao efetiva, calculada pela diferenca entre os respectivos `elapsed_s` (ou desde t0 quando warmup=0). Assim, atrasos de escalonamento nao sao tratados como segundos exatos. A leitura dos contadores de todas as conexoes e sequencial, portanto permanece uma pequena incerteza durante cada snapshot. Um send bloqueado pode ultrapassar a duracao solicitada; o executor aplica um prazo externo.
+As amostras são cumulativas, com coleta programada a cada segundo. `tick_s` identifica o segundo programado e `elapsed_s` registra, com `CLOCK_MONOTONIC`, o instante real ao concluir a leitura dos contadores. Os descartes inicial e final selecionam os *ticks* da janela estável (`window_s`), cuja duração efetiva é dada pela diferença entre os respectivos `elapsed_s` (ou desde $t_0$ quando `warmup=0`).
 
-Novas campanhas registram `sample_timing=monotonic` em config.json. Campanhas antigas sem `elapsed_s` continuam legiveis usando os segundos nominais originais; nao e possivel recuperar retroativamente seus instantes reais. Os resultados antigos sao preservados.
+## Saídas e compartilhamento
 
-## Saidas e falhas
+Cada campanha armazena configuração (`config.json`), dados de ambiente, manifesto de execução (`manifest.csv`), logs e CSVs brutos por rodada (`results.csv` e `samples.csv`). Apenas rodadas validadas entram nos CSVs consolidados.
 
-Cada campanha guarda configuracao, ambiente, ordem implicita das rodadas por N e repeticao, comandos do servidor, logs e CSVs brutos por rodada. `manifest.csv` registra todas as tentativas e os motivos de falha. Apenas rodadas validadas entram nos CSVs consolidados. `duration_s` no resumo e o tempo efetivamente medido pelo servidor; a duracao solicitada esta em config.json.
-
-Para compartilhar resultados com o grupo pelo Git, use `--output results/compartilhados/<campanha>`. Essa pasta e permitida pelo `.gitignore`; as demais pastas de resultados locais continuam ignoradas. Inclua a campanha no commit e envie ao repositorio remoto para que o grupo tenha acesso aos CSVs, logs, ambiente e analises. Preserve um diretorio diferente para cada maquina e campanha.
-
-O executor espera ate 60 segundos pelos clientes e, apos START, ate duracao + 30 segundos pela conclusao. No loopback nao abre conexao de sondagem. Para na primeira falha e preserva os dados. Ctrl+C encerra somente os processos locais que criou. Na LAN, interrompa tambem o comando no outro computador se necessario. Uma nova execucao cria outra campanha.
-
-A coleta apenas consulta o sistema. Comandos ausentes ou sem permissao ficam registrados. O cliente nao informa os bytes enviados; por isso a validacao verifica os dados recebidos, sem comprovar igualdade entre envio e recepcao nem identificar toda desconexao individual antecipada.
+Para versionar resultados pelo Git, utilize `--output results/compartilhados/<campanha>`. Essa pasta é permitida pelo `.gitignore`, enquanto as demais pastas em `results/` permanecem ignoradas localmente.
 
 ## Monitoramento de CPU e rede
 
-O executor coleta automaticamente contadores Linux de `/proc` aproximadamente a cada segundo, em uma thread Python. Usa apenas a biblioteca padrao, sem alterar os programas C. O ultimo intervalo pode ser menor que um segundo. A configuracao da coleta fica em `config.json`.
+O executor coleta automaticamente contadores Linux de `/proc` aproximadamente a cada segundo, em uma *thread* Python, usando apenas a biblioteca padrão:
 
-No servidor e no loopback, cada pasta em `rodadas/` recebe `cpu.csv` e `network.csv`. No modo cliente LAN, esses arquivos ficam na pasta de saida do proprio cliente. Cada linha identifica maquina, papel, N, repeticao, horario UTC, tempo desde o inicio local do monitor e duracao real do intervalo.
+- `cpu.csv`: utilização geral (`name=cpu`), por processador lógico (`cpu0`, `cpu1`, etc.) e dos processos locais cliente/servidor (`scope=process`, em que 100% equivale a um processador lógico ocupado).
+- `network.csv`: bytes recebidos/enviados, taxa em Mbps, erros e descartes por intervalo na interface monitorada (`lo` no *loopback*, ou a interface indicada por `--interface` na LAN).
+- `monitoring_warnings.txt`: gerado caso ocorram avisos de leitura ou interface ausente.
 
-- `cpu.csv`: utilizacao geral (`name=cpu`), por processador logico (`cpu0`, `cpu1`, etc.) e dos processos locais cliente/servidor. `scope` distingue sistema de processo. Para processos, 100% equivale a um processador logico ocupado; programas com varias threads podem superar 100%. Amostras de processos ja encerrados ficam ausentes.
-- `network.csv`: bytes recebidos/enviados, Mbps, erros e descartes em cada intervalo. Os valores sao diferencas dos contadores da interface. Incluem trafego de outros programas e cabecalhos conforme contabilizados pela interface. Nao equivalem a carga util medida pelo servidor nem medem retransmissoes TCP.
-- `monitoring_warnings.txt`: criado se houver falhas de coleta ou interface ausente. Uma falha do monitor nao invalida automaticamente a medicao de vazao; confira os avisos antes de usar as metricas.
+O argumento `--no-monitor` desativa a coleta caso se deseje executar rodadas sem monitoramento.
 
-Loopback monitora `lo` por padrao. Na LAN, `--interface` seleciona a interface local; sem esse argumento, todas sao registradas. Acrescente `--interface` ao comando gerado para o cliente usando o nome da interface dele, que pode diferir do servidor. No WSL2, os contadores sao das interfaces e processadores visiveis ao Linux.
+## Análise e geração de gráficos
 
-A coleta cobre a vida da rodada, incluindo espera por conexoes e encerramento. `elapsed_s` comeca no monitor local, sem sincronizacao com `GO` ou com o outro computador. Para comparar custos, mantenha o monitoramento igual nas campanhas. `--no-monitor` desativa a coleta e e propagado ao comando cliente LAN, permitindo um piloto para avaliar seu impacto. Os novos CSVs ficam disponiveis para discutir gargalos; `analyze.py` continua gerando os graficos de vazao.
-
-## Analise
-
-Com o ambiente Python ativado:
+Com o ambiente virtual Python ativado:
 
 ```bash
 python3 scripts/analyze.py results/loopback_pc_a --output results/loopback_pc_a/analise
-python3 scripts/analyze.py results/loopback_pc_a results/loopback_pc_b results/cabo_servidor_pc_a results/cabo_servidor_pc_b --output results/comparacao
+python3 scripts/analyze.py \
+  results/compartilhados/final_loopback_D15-126_20261111_112526 \
+  results/compartilhados/final_lan_cabo_D15-126_20261111_103930 \
+  results/compartilhados/final_lan_wifi_D15-126_20261111_093652 \
+  --output results/comparacao
 ```
 
-O diretorio de analise deve estar vazio ou nao existir. Campanhas com duracoes, blocos, descartes ou metodos de tempo diferentes sao rejeitadas; analise campanhas antigas e novas separadamente. Cada campanha permanece identificada, mesmo quando usa o mesmo tipo de rede.
+Saídas geradas por `scripts/analyze.py`:
 
-Saidas:
+- `summary.csv`: quantidade de rodadas válidas, máximo, média, desvio padrão amostral e intervalo de confiança de 95% (distribuição $t$).
+- `rounds.csv` e `per_client.csv`: valores por rodada e por conexão individual, em Mbps decimais.
+- `throughput_max`, `throughput_mean` e `per_client`: gráficos em PNG e PDF.
+- `warnings.txt`: registro de falhas, cenários ausentes ou repetições insuficientes.
 
-- `summary.csv`: quantidade valida, maximo, media, desvio padrao amostral e IC 95% pela distribuicao t.
-- `rounds.csv` e `per_client.csv`: valores usados nos graficos, em Mbps decimais.
-- `throughput_max`, `throughput_mean` e `per_client`: graficos em PNG e PDF.
-- `warnings.txt`: falhas, cenarios ausentes e repeticoes insuficientes.
+Além disso, o diretório `results/compartilhados/analises_completas_20261111/` contém uma suíte complementar de análise e visualização (`gerar_analises.py` e `index.html`) que consolida as quatro campanhas finais (200 rodadas e 1.100 observações de conexões), gerando tabelas adicionais de equidade (índice de Jain), ganho relativo, variabilidade temporal e dez figuras em PNG, PDF e SVG.
 
-O grafico obrigatorio e throughput_max: numero de clientes versus maior vazao agregada observada entre as repeticoes validas. Esse maximo nao representa capacidade teorica. A media usa IC de 95%; uma unica repeticao nao fornece desvio ou IC. Valores extremos nao sao removidos e cenarios ausentes nao recebem zero.
+## Síntese dos resultados e discussões
 
-A analise revalida os CSVs de cada rodada a partir do manifesto e das amostras originais. Use esses arquivos para discutir variacao, saturacao e limites de CPU, memoria e rede. A redacao do relatorio, iperf3, SSH, varredura de blocos e contagem de envio ficam fora desta versao.
+Os experimentos finais foram conduzidos entre as máquinas `D15-126` (servidor, Intel Core i5-12500H) e `ANVS14` (cliente, Intel Core Ultra 7 256V), ambas sob Ubuntu 26.04 em WSL2, com $N$ de 1 a 10 clientes simultâneos e 5 repetições de 30 s por valor de $N$:
+
+- **Rede local cabeada (Ethernet, 1 Gbps):** a vazão agregada média cresceu de 202,9 Mbps ($N=1$) para 743,6 Mbps ($N=3$) e estabilizou em torno de **941 Mbps** a partir de $N=4$ (máximo de 941,6 Mbps). Assim, a transmissão por cabo chegou aproximadamente ao limite físico do cabo, pois o cabo utilizado é de 1 Gbps. Descontada a sobrecarga dos cabeçalhos Ethernet, IP e TCP e do espaçamento entre quadros (com MTU de 1492 bytes no ambiente WSL2), o limite teórico de vazão útil (*goodput*) do enlace de 1 Gbps é de cerca de 941 Mbps. Logo, a partir de quatro clientes, o gargalo passou a ser o próprio limite físico do cabo.
+- **Rede local sem fio (Wi-Fi):** a vazão agregada média permaneceu entre **61,2 e 81,4 Mbps** (máximo de 91,6 Mbps em $N=9$), sem ganho sistemático com o aumento de clientes, pois o meio sem fio compartilhado já estava saturado desde $N=1$.
+- **Loopback (`D15-126`):** sem limitação de enlace físico de rede, a vazão agregada atingiu média de **176,3 Gbps** (máximo de 180,8 Gbps) com $N=5$ clientes e reduziu-se para 143,4 Gbps em $N=10$ devido à contenção de processador, trocas de contexto e compartilhamento de núcleos entre as *threads* de cliente e servidor na mesma máquina.
+
+O relatório completo com a descrição da arquitetura, metodologia, resultados e discussões encontra-se em `docs/sbc-template.tex` (`docs/sbc-template.pdf`).
