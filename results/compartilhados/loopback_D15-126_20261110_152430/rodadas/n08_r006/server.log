@@ -1,0 +1,31 @@
+[server] escutando na porta 5000, esperando 8 clientes...
+[server] cliente 1/8 registrado: cliente_1
+[server] cliente 2/8 registrado: cliente_2
+[server] cliente 3/8 registrado: cliente_4
+[server] cliente 4/8 registrado: cliente_3
+[server] cliente 5/8 registrado: cliente_6
+[server] cliente 6/8 registrado: cliente_7
+[server] todas as conexoes aceitas, aguardando nomes...
+[server] cliente 7/8 registrado: cliente_5
+[server] cliente 8/8 registrado: cliente_8
+[server] START medicao iniciada
+
+[server] ======================================
+[server] Rodada concluida.
+[server]   N clientes       : 8
+[server]   Tempo total      : 30.007 s
+[server]   Bytes totais     : 542573527040
+[server]   Vazao agregada   : 144652.73 Mbps (total)
+[server]   Janela estavel   : 20.000 s (warmup=5s, cooldown=5s)
+[server]   Bytes na janela  : 361424762960
+[server]   Vazao na janela  : 144569.91 Mbps
+[server] Por cliente:
+[server]   [0] cliente_1         62409998336 bytes  16638.81 Mbps
+[server]   [1] cliente_2         72792342528 bytes  19406.79 Mbps
+[server]   [2] cliente_4         62710743040 bytes  16718.99 Mbps
+[server]   [3] cliente_3         69743280128 bytes  18593.90 Mbps
+[server]   [4] cliente_6         65944027136 bytes  17581.00 Mbps
+[server]   [5] cliente_7         67570237440 bytes  18014.55 Mbps
+[server]   [6] cliente_5         70889242624 bytes  18899.42 Mbps
+[server]   [7] cliente_8         70513655808 bytes  18799.28 Mbps
+[server] ======================================

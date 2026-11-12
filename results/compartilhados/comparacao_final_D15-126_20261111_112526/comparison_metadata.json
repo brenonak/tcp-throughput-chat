@@ -1,0 +1,60 @@
+{
+  "created_at": "2026-11-11T14:57:46.408075+00:00",
+  "revision": "53bcdefdcc2b8c33fc262fe8fc41f16613f87306",
+  "sources": [
+    {
+      "path": "/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930",
+      "label": "lan_cabo",
+      "server_machine_id": "D15-126",
+      "client_machine_id": "ANVS14",
+      "monitoring_interface": "eth0",
+      "valid_rounds": 50
+    },
+    {
+      "path": "/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_wifi_D15-126_20261111_093652",
+      "label": "lan_wifi",
+      "server_machine_id": "D15-126",
+      "client_machine_id": "ANVS14",
+      "monitoring_interface": "eth0",
+      "valid_rounds": 50
+    },
+    {
+      "path": "/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_loopback_D15-126_20261111_112526",
+      "label": "loopback",
+      "server_machine_id": "D15-126",
+      "client_machine_id": "D15-126",
+      "monitoring_interface": "lo",
+      "valid_rounds": 50
+    }
+  ],
+  "common_parameters": {
+    "clients": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "repetitions": 5,
+    "duration_s": 30,
+    "warmup_s": 5,
+    "cooldown_s": 5,
+    "interval_s": 5,
+    "block_bytes": 65536,
+    "sample_timing": "monotonic",
+    "monitoring_enabled": true
+  },
+  "total_valid_rounds": 150,
+  "throughput_unit": "decimal Mbps",
+  "notes": [
+    "Loopback mede comunicacao local no D15-126.",
+    "LANs usam cliente ANVS14 e servidor D15-126 via encaminhamento Windows/WSL.",
+    "Maximos observados nao representam capacidade teorica.",
+    "Comparacao entre as campanhas realizadas; sem inferencia causal isolada sobre hardware ou protocolo."
+  ]
+}

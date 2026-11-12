@@ -1,0 +1,4 @@
+Comando: iw dev eth0 link
+/mnt/c/Users/navet/OneDrive/Estvn/Documentos/repos/tcp-throughput-chat/scripts/coleta_ambiente.sh: line 9: iw: command not found
+
+Consulta indisponivel (ferramenta ou permissao).

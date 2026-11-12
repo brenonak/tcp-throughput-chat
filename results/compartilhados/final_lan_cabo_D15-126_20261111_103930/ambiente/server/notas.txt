@@ -1,0 +1,6 @@
+Conexao (loopback/cabo/Wi-Fi):
+Interface:
+Cabo e velocidade:
+Roteador/switch:
+Condicoes da rede e outras cargas:
+Flags: -O2 -Wall -Wextra -pthread

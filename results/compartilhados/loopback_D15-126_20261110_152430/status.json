@@ -1,0 +1,24 @@
+{
+  "status": "complete",
+  "machine_id": "D15-126",
+  "valid_rounds": 100,
+  "planned_rounds": 100,
+  "failed_rounds": 0,
+  "repetitions_per_client_count": 10,
+  "duration_s": 30,
+  "started_at": "2026-11-10T18:25:58.517834+00:00",
+  "finished_at": "2026-11-10T19:26:11.271592+00:00",
+  "elapsed_campaign_s": 3612.753758,
+  "cpu_rows": 59691,
+  "network_rows": 3156,
+  "interface_error_and_drop_totals": {
+    "rx_errors": 0,
+    "tx_errors": 0,
+    "rx_dropped": 0,
+    "tx_dropped": 0
+  },
+  "monitoring_warning_files": 0,
+  "analysis_warnings": 0,
+  "previous_incomplete_attempt": "../loopback_D15-126_20261110_151411",
+  "command": "bash scripts/run_experiments.sh loopback --machine-id D15-126 --interface lo --output results/compartilhados/loopback_D15-126_20261110_152430"
+}

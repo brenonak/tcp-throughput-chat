@@ -1,0 +1,447 @@
+{
+  "mode": "loopback",
+  "ip": "127.0.0.1",
+  "label": "loopback",
+  "port": 5000,
+  "duration": 30,
+  "repetitions": 10,
+  "clients": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "warmup": 5,
+  "cooldown": 5,
+  "interval": 5,
+  "rep": 1,
+  "output": "/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/loopback_D15-126_20261110_152430",
+  "interface": "lo",
+  "no_monitor": false,
+  "machine_id": "D15-126",
+  "client_machine_id": "D15-126",
+  "server_machine_id": "D15-126",
+  "block_bytes": 65536,
+  "machine": {
+    "id": "D15-126",
+    "hostname": "D15-126",
+    "system": "Linux",
+    "release": "6.18.33.2-microsoft-standard-WSL2",
+    "architecture": "x86_64"
+  },
+  "compile_flags": "-O2 -Wall -Wextra -pthread",
+  "created_at": "2026-11-10T18:25:57.123928+00:00",
+  "monitoring": {
+    "enabled": true,
+    "interval_s": 1,
+    "interface": "lo"
+  },
+  "order": [
+    {
+      "n_clients": 1,
+      "rep": 1
+    },
+    {
+      "n_clients": 1,
+      "rep": 2
+    },
+    {
+      "n_clients": 1,
+      "rep": 3
+    },
+    {
+      "n_clients": 1,
+      "rep": 4
+    },
+    {
+      "n_clients": 1,
+      "rep": 5
+    },
+    {
+      "n_clients": 1,
+      "rep": 6
+    },
+    {
+      "n_clients": 1,
+      "rep": 7
+    },
+    {
+      "n_clients": 1,
+      "rep": 8
+    },
+    {
+      "n_clients": 1,
+      "rep": 9
+    },
+    {
+      "n_clients": 1,
+      "rep": 10
+    },
+    {
+      "n_clients": 2,
+      "rep": 1
+    },
+    {
+      "n_clients": 2,
+      "rep": 2
+    },
+    {
+      "n_clients": 2,
+      "rep": 3
+    },
+    {
+      "n_clients": 2,
+      "rep": 4
+    },
+    {
+      "n_clients": 2,
+      "rep": 5
+    },
+    {
+      "n_clients": 2,
+      "rep": 6
+    },
+    {
+      "n_clients": 2,
+      "rep": 7
+    },
+    {
+      "n_clients": 2,
+      "rep": 8
+    },
+    {
+      "n_clients": 2,
+      "rep": 9
+    },
+    {
+      "n_clients": 2,
+      "rep": 10
+    },
+    {
+      "n_clients": 3,
+      "rep": 1
+    },
+    {
+      "n_clients": 3,
+      "rep": 2
+    },
+    {
+      "n_clients": 3,
+      "rep": 3
+    },
+    {
+      "n_clients": 3,
+      "rep": 4
+    },
+    {
+      "n_clients": 3,
+      "rep": 5
+    },
+    {
+      "n_clients": 3,
+      "rep": 6
+    },
+    {
+      "n_clients": 3,
+      "rep": 7
+    },
+    {
+      "n_clients": 3,
+      "rep": 8
+    },
+    {
+      "n_clients": 3,
+      "rep": 9
+    },
+    {
+      "n_clients": 3,
+      "rep": 10
+    },
+    {
+      "n_clients": 4,
+      "rep": 1
+    },
+    {
+      "n_clients": 4,
+      "rep": 2
+    },
+    {
+      "n_clients": 4,
+      "rep": 3
+    },
+    {
+      "n_clients": 4,
+      "rep": 4
+    },
+    {
+      "n_clients": 4,
+      "rep": 5
+    },
+    {
+      "n_clients": 4,
+      "rep": 6
+    },
+    {
+      "n_clients": 4,
+      "rep": 7
+    },
+    {
+      "n_clients": 4,
+      "rep": 8
+    },
+    {
+      "n_clients": 4,
+      "rep": 9
+    },
+    {
+      "n_clients": 4,
+      "rep": 10
+    },
+    {
+      "n_clients": 5,
+      "rep": 1
+    },
+    {
+      "n_clients": 5,
+      "rep": 2
+    },
+    {
+      "n_clients": 5,
+      "rep": 3
+    },
+    {
+      "n_clients": 5,
+      "rep": 4
+    },
+    {
+      "n_clients": 5,
+      "rep": 5
+    },
+    {
+      "n_clients": 5,
+      "rep": 6
+    },
+    {
+      "n_clients": 5,
+      "rep": 7
+    },
+    {
+      "n_clients": 5,
+      "rep": 8
+    },
+    {
+      "n_clients": 5,
+      "rep": 9
+    },
+    {
+      "n_clients": 5,
+      "rep": 10
+    },
+    {
+      "n_clients": 6,
+      "rep": 1
+    },
+    {
+      "n_clients": 6,
+      "rep": 2
+    },
+    {
+      "n_clients": 6,
+      "rep": 3
+    },
+    {
+      "n_clients": 6,
+      "rep": 4
+    },
+    {
+      "n_clients": 6,
+      "rep": 5
+    },
+    {
+      "n_clients": 6,
+      "rep": 6
+    },
+    {
+      "n_clients": 6,
+      "rep": 7
+    },
+    {
+      "n_clients": 6,
+      "rep": 8
+    },
+    {
+      "n_clients": 6,
+      "rep": 9
+    },
+    {
+      "n_clients": 6,
+      "rep": 10
+    },
+    {
+      "n_clients": 7,
+      "rep": 1
+    },
+    {
+      "n_clients": 7,
+      "rep": 2
+    },
+    {
+      "n_clients": 7,
+      "rep": 3
+    },
+    {
+      "n_clients": 7,
+      "rep": 4
+    },
+    {
+      "n_clients": 7,
+      "rep": 5
+    },
+    {
+      "n_clients": 7,
+      "rep": 6
+    },
+    {
+      "n_clients": 7,
+      "rep": 7
+    },
+    {
+      "n_clients": 7,
+      "rep": 8
+    },
+    {
+      "n_clients": 7,
+      "rep": 9
+    },
+    {
+      "n_clients": 7,
+      "rep": 10
+    },
+    {
+      "n_clients": 8,
+      "rep": 1
+    },
+    {
+      "n_clients": 8,
+      "rep": 2
+    },
+    {
+      "n_clients": 8,
+      "rep": 3
+    },
+    {
+      "n_clients": 8,
+      "rep": 4
+    },
+    {
+      "n_clients": 8,
+      "rep": 5
+    },
+    {
+      "n_clients": 8,
+      "rep": 6
+    },
+    {
+      "n_clients": 8,
+      "rep": 7
+    },
+    {
+      "n_clients": 8,
+      "rep": 8
+    },
+    {
+      "n_clients": 8,
+      "rep": 9
+    },
+    {
+      "n_clients": 8,
+      "rep": 10
+    },
+    {
+      "n_clients": 9,
+      "rep": 1
+    },
+    {
+      "n_clients": 9,
+      "rep": 2
+    },
+    {
+      "n_clients": 9,
+      "rep": 3
+    },
+    {
+      "n_clients": 9,
+      "rep": 4
+    },
+    {
+      "n_clients": 9,
+      "rep": 5
+    },
+    {
+      "n_clients": 9,
+      "rep": 6
+    },
+    {
+      "n_clients": 9,
+      "rep": 7
+    },
+    {
+      "n_clients": 9,
+      "rep": 8
+    },
+    {
+      "n_clients": 9,
+      "rep": 9
+    },
+    {
+      "n_clients": 9,
+      "rep": 10
+    },
+    {
+      "n_clients": 10,
+      "rep": 1
+    },
+    {
+      "n_clients": 10,
+      "rep": 2
+    },
+    {
+      "n_clients": 10,
+      "rep": 3
+    },
+    {
+      "n_clients": 10,
+      "rep": 4
+    },
+    {
+      "n_clients": 10,
+      "rep": 5
+    },
+    {
+      "n_clients": 10,
+      "rep": 6
+    },
+    {
+      "n_clients": 10,
+      "rep": 7
+    },
+    {
+      "n_clients": 10,
+      "rep": 8
+    },
+    {
+      "n_clients": 10,
+      "rep": 9
+    },
+    {
+      "n_clients": 10,
+      "rep": 10
+    }
+  ]
+}

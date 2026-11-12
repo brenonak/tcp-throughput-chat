@@ -1,0 +1,5 @@
+Saida: /mnt/c/Users/navet/OneDrive/Estvn/Documentos/repos/tcp-throughput-chat/results/compartilhados/lan_wifi_ANVS14_cliente_20261111_093745/n09_r004
+Maquinas: servidor=D15-126, cliente=ANVS14
+make: Entering directory '/mnt/c/Users/navet/OneDrive/Estvn/Documentos/repos/tcp-throughput-chat'
+make: Nothing to be done for 'client'.
+make: Leaving directory '/mnt/c/Users/navet/OneDrive/Estvn/Documentos/repos/tcp-throughput-chat'

@@ -1,0 +1,4 @@
+Comando: iw dev lo link
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/scripts/coleta_ambiente.sh: line 9: iw: command not found
+
+Consulta indisponivel (ferramenta ou permissao).

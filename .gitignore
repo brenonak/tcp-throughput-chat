@@ -1,0 +1,25 @@
+/build/
+/results/*
+!/results/compartilhados/
+/.venv/
+__pycache__/
+*.pyc
+
+# Artefatos de compilacao do LaTeX
+*.aux
+*.bbl
+*.blg
+*.bcf
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.nav
+*.out
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+/docs/*.log
+

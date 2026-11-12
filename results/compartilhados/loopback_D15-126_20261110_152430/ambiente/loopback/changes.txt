@@ -1,0 +1,21 @@
+Comando: git -C /mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/scripts/.. status --short
+ M .gitignore
+ M README.md
+ M docs/caption2.sty
+ M docs/sbc-template.aux
+ M docs/sbc-template.bbl
+ M docs/sbc-template.bib
+ M docs/sbc-template.blg
+ M docs/sbc-template.fdb_latexmk
+ M docs/sbc-template.fls
+ M docs/sbc-template.log
+ M docs/sbc-template.sty
+ M docs/sbc-template.tex
+ M docs/sbc.bst
+ M original/chat_client.c
+ M original/chat_example
+ M original/chat_server.c
+ M scripts/experiments.py
+ M src/chat_example
+ M tests/test_experiments.py
+?? results/

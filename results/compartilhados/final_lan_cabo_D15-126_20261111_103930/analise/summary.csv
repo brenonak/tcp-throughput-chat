@@ -1,0 +1,11 @@
+campaign,label,n_clients,server_machine_id,client_machine_id,count,maximum,mean,std,ci95_low,ci95_high
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930,lan_cabo,1,D15-126,ANVS14,5,209.547,202.9262,5.032793329752371,196.67716171204643,209.17523828795356
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930,lan_cabo,2,D15-126,ANVS14,5,400.473,387.4692,11.398878879082815,373.3156224759576,401.6227775240424
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930,lan_cabo,3,D15-126,ANVS14,5,777.96,743.629,27.760130259060396,709.1602456718778,778.0977543281223
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930,lan_cabo,4,D15-126,ANVS14,5,940.598,939.7286,0.7721986790975213,938.7697887007041,940.687411299296
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930,lan_cabo,5,D15-126,ANVS14,5,941.287,940.9324,0.236681853972808,940.6385206628938,941.2262793371062
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930,lan_cabo,6,D15-126,ANVS14,5,941.462,940.3756,1.5082931744193386,938.502806666587,942.2483933334129
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930,lan_cabo,7,D15-126,ANVS14,5,941.138,941.0592,0.05631784797024817,940.989272155719,941.129127844281
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930,lan_cabo,8,D15-126,ANVS14,5,941.63,941.1494,0.27124951612859305,940.8125992412929,941.4862007587071
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930,lan_cabo,9,D15-126,ANVS14,5,941.181,941.0472,0.10766940141008138,940.913510780561,941.180889219439
+/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_lan_cabo_D15-126_20261111_103930,lan_cabo,10,D15-126,ANVS14,5,941.037,940.9974,0.029236962906588438,940.961097515742,941.0337024842579

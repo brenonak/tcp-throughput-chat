@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="720" viewBox="0 0 1120 720">
+<rect width="1120" height="720" fill="white"/>
+<text x="35" y="32" font-family="Arial,sans-serif" font-size="23" fill="#0f172a">Máximo observado — quatro cenários</text>
+<text x="35" y="59" font-family="Arial,sans-serif" font-size="14" fill="#475569">Eixo Y logarítmico: intervalos iguais representam razões iguais. Valores em Mbps decimais.</text>
+<text x="115" y="102" font-family="Arial,sans-serif" font-size="16" fill="#0f172a">Todas as campanhas finais</text>
+<text x="115" y="123" font-family="Arial,sans-serif" font-size="12" fill="#475569">Mbps — escala logarítmica</text>
+<line x1="115" y1="580.0" x2="1060" y2="580.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="45" y="584.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">10</text>
+<line x1="115" y1="491.0" x2="1060" y2="491.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="45" y="495.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">100</text>
+<line x1="115" y1="402.0" x2="1060" y2="402.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="45" y="406.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">1000</text>
+<line x1="115" y1="313.0" x2="1060" y2="313.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="45" y="317.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">10000</text>
+<line x1="115" y1="224.0" x2="1060" y2="224.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="45" y="228.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">100000</text>
+<line x1="115" y1="135.0" x2="1060" y2="135.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="45" y="139.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">1e+06</text>
+<text x="111.0" y="600" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">1</text>
+<text x="216.0" y="600" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">2</text>
+<text x="321.0" y="600" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">3</text>
+<text x="426.0" y="600" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">4</text>
+<text x="531.0" y="600" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">5</text>
+<text x="636.0" y="600" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">6</text>
+<text x="741.0" y="600" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">7</text>
+<text x="846.0" y="600" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">8</text>
+<text x="951.0" y="600" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">9</text>
+<text x="1056.0" y="600" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">10</text>
+<text x="512.5" y="623" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">Conexões simultâneas (N)</text>
+<circle cx="115.0" cy="250.2215227990573" r="3.5" fill="#2563eb"/>
+<line x1="115.0" y1="250.2215227990573" x2="220.0" y2="224.38297906643953" stroke="#2563eb" stroke-width="2"/>
+<circle cx="220.0" cy="224.38297906643953" r="3.5" fill="#2563eb"/>
+<line x1="220.0" y1="224.38297906643953" x2="325.0" y2="207.76782758805416" stroke="#2563eb" stroke-width="2"/>
+<circle cx="325.0" cy="207.76782758805416" r="3.5" fill="#2563eb"/>
+<line x1="325.0" y1="207.76782758805416" x2="430.0" y2="202.1366675195669" stroke="#2563eb" stroke-width="2"/>
+<circle cx="430.0" cy="202.1366675195669" r="3.5" fill="#2563eb"/>
+<line x1="430.0" y1="202.1366675195669" x2="535.0" y2="201.11743778992178" stroke="#2563eb" stroke-width="2"/>
+<circle cx="535.0" cy="201.11743778992178" r="3.5" fill="#2563eb"/>
+<line x1="535.0" y1="201.11743778992178" x2="640.0" y2="201.57710520874775" stroke="#2563eb" stroke-width="2"/>
+<circle cx="640.0" cy="201.57710520874775" r="3.5" fill="#2563eb"/>
+<line x1="640.0" y1="201.57710520874775" x2="745.0" y2="204.5358189742493" stroke="#2563eb" stroke-width="2"/>
+<circle cx="745.0" cy="204.5358189742493" r="3.5" fill="#2563eb"/>
+<line x1="745.0" y1="204.5358189742493" x2="850.0" y2="208.44344077051682" stroke="#2563eb" stroke-width="2"/>
+<circle cx="850.0" cy="208.44344077051682" r="3.5" fill="#2563eb"/>
+<line x1="850.0" y1="208.44344077051682" x2="955.0" y2="209.4291944365625" stroke="#2563eb" stroke-width="2"/>
+<circle cx="955.0" cy="209.4291944365625" r="3.5" fill="#2563eb"/>
+<line x1="955.0" y1="209.4291944365625" x2="1060.0" y2="209.87779819413333" stroke="#2563eb" stroke-width="2"/>
+<circle cx="1060.0" cy="209.87779819413333" r="3.5" fill="#2563eb"/>
+<circle cx="115.0" cy="236.52440123717673" r="3.5" fill="#d97706"/>
+<line x1="115.0" y1="236.52440123717673" x2="220.0" y2="215.92723071093388" stroke="#d97706" stroke-width="2"/>
+<circle cx="220.0" cy="215.92723071093388" r="3.5" fill="#d97706"/>
+<line x1="220.0" y1="215.92723071093388" x2="325.0" y2="205.8076956537971" stroke="#d97706" stroke-width="2"/>
+<circle cx="325.0" cy="205.8076956537971" r="3.5" fill="#d97706"/>
+<line x1="325.0" y1="205.8076956537971" x2="430.0" y2="202.93731846874243" stroke="#d97706" stroke-width="2"/>
+<circle cx="430.0" cy="202.93731846874243" r="3.5" fill="#d97706"/>
+<line x1="430.0" y1="202.93731846874243" x2="535.0" y2="195.90828061610654" stroke="#d97706" stroke-width="2"/>
+<circle cx="535.0" cy="195.90828061610654" r="3.5" fill="#d97706"/>
+<line x1="535.0" y1="195.90828061610654" x2="640.0" y2="191.03839615061742" stroke="#d97706" stroke-width="2"/>
+<circle cx="640.0" cy="191.03839615061742" r="3.5" fill="#d97706"/>
+<line x1="640.0" y1="191.03839615061742" x2="745.0" y2="188.06288820287926" stroke="#d97706" stroke-width="2"/>
+<circle cx="745.0" cy="188.06288820287926" r="3.5" fill="#d97706"/>
+<line x1="745.0" y1="188.06288820287926" x2="850.0" y2="185.3566221734842" stroke="#d97706" stroke-width="2"/>
+<circle cx="850.0" cy="185.3566221734842" r="3.5" fill="#d97706"/>
+<line x1="850.0" y1="185.3566221734842" x2="955.0" y2="185.9148383240709" stroke="#d97706" stroke-width="2"/>
+<circle cx="955.0" cy="185.9148383240709" r="3.5" fill="#d97706"/>
+<line x1="955.0" y1="185.9148383240709" x2="1060.0" y2="186.77573287572363" stroke="#d97706" stroke-width="2"/>
+<circle cx="1060.0" cy="186.77573287572363" r="3.5" fill="#d97706"/>
+<circle cx="115.0" cy="462.4059511640278" r="3.5" fill="#15803d"/>
+<line x1="115.0" y1="462.4059511640278" x2="220.0" y2="437.37098153732734" stroke="#15803d" stroke-width="2"/>
+<circle cx="220.0" cy="437.37098153732734" r="3.5" fill="#15803d"/>
+<line x1="220.0" y1="437.37098153732734" x2="325.0" y2="411.70480317910295" stroke="#15803d" stroke-width="2"/>
+<circle cx="325.0" cy="411.70480317910295" r="3.5" fill="#15803d"/>
+<line x1="325.0" y1="411.70480317910295" x2="430.0" y2="404.36703946387496" stroke="#15803d" stroke-width="2"/>
+<circle cx="430.0" cy="404.36703946387496" r="3.5" fill="#15803d"/>
+<line x1="430.0" y1="404.36703946387496" x2="535.0" y2="404.338736594024" stroke="#15803d" stroke-width="2"/>
+<circle cx="535.0" cy="404.338736594024" r="3.5" fill="#15803d"/>
+<line x1="535.0" y1="404.338736594024" x2="640.0" y2="404.3315512107625" stroke="#15803d" stroke-width="2"/>
+<circle cx="640.0" cy="404.3315512107625" r="3.5" fill="#15803d"/>
+<line x1="640.0" y1="404.3315512107625" x2="745.0" y2="404.3448554876177" stroke="#15803d" stroke-width="2"/>
+<circle cx="745.0" cy="404.3448554876177" r="3.5" fill="#15803d"/>
+<line x1="745.0" y1="404.3448554876177" x2="850.0" y2="404.3246544992788" stroke="#15803d" stroke-width="2"/>
+<circle cx="850.0" cy="404.3246544992788" r="3.5" fill="#15803d"/>
+<line x1="850.0" y1="404.3246544992788" x2="955.0" y2="404.34308953298137" stroke="#15803d" stroke-width="2"/>
+<circle cx="955.0" cy="404.34308953298137" r="3.5" fill="#15803d"/>
+<line x1="955.0" y1="404.34308953298137" x2="1060.0" y2="404.34900374492804" stroke="#15803d" stroke-width="2"/>
+<circle cx="1060.0" cy="404.34900374492804" r="3.5" fill="#15803d"/>
+<circle cx="115.0" cy="497.97731080293056" r="3.5" fill="#be185d"/>
+<line x1="115.0" y1="497.97731080293056" x2="220.0" y2="496.7775374313414" stroke="#be185d" stroke-width="2"/>
+<circle cx="220.0" cy="496.7775374313414" r="3.5" fill="#be185d"/>
+<line x1="220.0" y1="496.7775374313414" x2="325.0" y2="495.1984563493925" stroke="#be185d" stroke-width="2"/>
+<circle cx="325.0" cy="495.1984563493925" r="3.5" fill="#be185d"/>
+<line x1="325.0" y1="495.1984563493925" x2="430.0" y2="499.5699509668784" stroke="#be185d" stroke-width="2"/>
+<circle cx="430.0" cy="499.5699509668784" r="3.5" fill="#be185d"/>
+<line x1="430.0" y1="499.5699509668784" x2="535.0" y2="504.5610923186546" stroke="#be185d" stroke-width="2"/>
+<circle cx="535.0" cy="504.5610923186546" r="3.5" fill="#be185d"/>
+<line x1="535.0" y1="504.5610923186546" x2="640.0" y2="500.55108865911393" stroke="#be185d" stroke-width="2"/>
+<circle cx="640.0" cy="500.55108865911393" r="3.5" fill="#be185d"/>
+<line x1="640.0" y1="500.55108865911393" x2="745.0" y2="496.4481506586122" stroke="#be185d" stroke-width="2"/>
+<circle cx="745.0" cy="496.4481506586122" r="3.5" fill="#be185d"/>
+<line x1="745.0" y1="496.4481506586122" x2="850.0" y2="497.7524900594622" stroke="#be185d" stroke-width="2"/>
+<circle cx="850.0" cy="497.7524900594622" r="3.5" fill="#be185d"/>
+<line x1="850.0" y1="497.7524900594622" x2="955.0" y2="494.38286441783424" stroke="#be185d" stroke-width="2"/>
+<circle cx="955.0" cy="494.38286441783424" r="3.5" fill="#be185d"/>
+<line x1="955.0" y1="494.38286441783424" x2="1060.0" y2="499.5583735385745" stroke="#be185d" stroke-width="2"/>
+<circle cx="1060.0" cy="499.5583735385745" r="3.5" fill="#be185d"/>
+<line x1="60" y1="656" x2="85" y2="656" stroke="#2563eb" stroke-width="3"/>
+<text x="94" y="660" font-family="Arial,sans-serif" font-size="13" fill="#0f172a">Loopback D15-126</text>
+<line x1="590" y1="656" x2="615" y2="656" stroke="#d97706" stroke-width="3"/>
+<text x="624" y="660" font-family="Arial,sans-serif" font-size="13" fill="#0f172a">Loopback ANVS14</text>
+<line x1="60" y1="679" x2="85" y2="679" stroke="#15803d" stroke-width="3"/>
+<text x="94" y="683" font-family="Arial,sans-serif" font-size="13" fill="#0f172a">Cabo ANVS14 → D15-126</text>
+<line x1="590" y1="679" x2="615" y2="679" stroke="#be185d" stroke-width="3"/>
+<text x="624" y="683" font-family="Arial,sans-serif" font-size="13" fill="#0f172a">Wi-Fi ANVS14 → D15-126</text>
+</svg>

@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="720" viewBox="0 0 1120 720">
+<rect width="1120" height="720" fill="white"/>
+<text x="35" y="32" font-family="Arial,sans-serif" font-size="23" fill="#0f172a">Máximo observado — detalhes por cenário</text>
+<text x="35" y="59" font-family="Arial,sans-serif" font-size="14" fill="#475569">Escalas Y independentes e lineares, iniciadas em zero. Compare os valores dos eixos entre painéis.</text>
+<text x="110" y="102" font-family="Arial,sans-serif" font-size="16" fill="#0f172a">Loopback D15-126</text>
+<text x="110" y="123" font-family="Arial,sans-serif" font-size="12" fill="#475569">Mbps — escala própria</text>
+<line x1="110" y1="295.0" x2="535" y2="295.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="40" y="299.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">0.00</text>
+<line x1="110" y1="255.0" x2="535" y2="255.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="40" y="259.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">50 613.40</text>
+<line x1="110" y1="215.0" x2="535" y2="215.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="40" y="219.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">101 226.79</text>
+<line x1="110" y1="175.0" x2="535" y2="175.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="40" y="179.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">151 840.19</text>
+<line x1="110" y1="135.0" x2="535" y2="135.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="40" y="139.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">202 453.58</text>
+<text x="106.0" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">1</text>
+<text x="153.22222222222223" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">2</text>
+<text x="200.44444444444446" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">3</text>
+<text x="247.66666666666666" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">4</text>
+<text x="294.8888888888889" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">5</text>
+<text x="342.1111111111111" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">6</text>
+<text x="389.3333333333333" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">7</text>
+<text x="436.55555555555554" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">8</text>
+<text x="483.77777777777777" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">9</text>
+<text x="531.0" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">10</text>
+<text x="247.5" y="338" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">Conexões simultâneas (N)</text>
+<circle cx="110.0" cy="254.89757200102227" r="3.5" fill="#2563eb"/>
+<line x1="110.0" y1="254.89757200102227" x2="157.22222222222223" y2="216.74873196928115" stroke="#2563eb" stroke-width="2"/>
+<circle cx="157.22222222222223" cy="216.74873196928115" r="3.5" fill="#2563eb"/>
+<line x1="157.22222222222223" y1="216.74873196928115" x2="204.44444444444446" y2="174.7241377243562" stroke="#2563eb" stroke-width="2"/>
+<circle cx="204.44444444444446" cy="174.7241377243562" r="3.5" fill="#2563eb"/>
+<line x1="204.44444444444446" y1="174.7241377243562" x2="251.66666666666666" y2="155.8606594945669" stroke="#2563eb" stroke-width="2"/>
+<circle cx="251.66666666666666" cy="155.8606594945669" r="3.5" fill="#2563eb"/>
+<line x1="251.66666666666666" y1="155.8606594945669" x2="298.8888888888889" y2="152.14285714285717" stroke="#2563eb" stroke-width="2"/>
+<circle cx="298.8888888888889" cy="152.14285714285717" r="3.5" fill="#2563eb"/>
+<line x1="298.8888888888889" y1="152.14285714285717" x2="346.1111111111111" y2="153.83170886930472" stroke="#2563eb" stroke-width="2"/>
+<circle cx="346.1111111111111" cy="153.83170886930472" r="3.5" fill="#2563eb"/>
+<line x1="346.1111111111111" y1="153.83170886930472" x2="393.3333333333333" y2="164.23449882416188" stroke="#2563eb" stroke-width="2"/>
+<circle cx="393.3333333333333" cy="164.23449882416188" r="3.5" fill="#2563eb"/>
+<line x1="393.3333333333333" y1="164.23449882416188" x2="440.55555555555554" y2="176.80820735486532" stroke="#2563eb" stroke-width="2"/>
+<circle cx="440.55555555555554" cy="176.80820735486532" r="3.5" fill="#2563eb"/>
+<line x1="440.55555555555554" y1="176.80820735486532" x2="487.77777777777777" y2="179.78436019279837" stroke="#2563eb" stroke-width="2"/>
+<circle cx="487.77777777777777" cy="179.78436019279837" r="3.5" fill="#2563eb"/>
+<line x1="487.77777777777777" y1="179.78436019279837" x2="535.0" y2="181.11384144233213" stroke="#2563eb" stroke-width="2"/>
+<circle cx="535.0" cy="181.11384144233213" r="3.5" fill="#2563eb"/>
+<text x="660" y="102" font-family="Arial,sans-serif" font-size="16" fill="#0f172a">Loopback ANVS14</text>
+<text x="660" y="123" font-family="Arial,sans-serif" font-size="12" fill="#475569">Mbps — escala própria</text>
+<line x1="660" y1="295.0" x2="1085" y2="295.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="590" y="299.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">0.00</text>
+<line x1="660" y1="255.0" x2="1085" y2="255.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="590" y="259.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">76 094.50</text>
+<line x1="660" y1="215.0" x2="1085" y2="215.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="590" y="219.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">152 189.01</text>
+<line x1="660" y1="175.0" x2="1085" y2="175.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="590" y="179.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">228 283.51</text>
+<line x1="660" y1="135.0" x2="1085" y2="135.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="590" y="139.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">304 378.01</text>
+<text x="656.0" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">1</text>
+<text x="703.2222222222222" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">2</text>
+<text x="750.4444444444445" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">3</text>
+<text x="797.6666666666666" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">4</text>
+<text x="844.8888888888889" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">5</text>
+<text x="892.1111111111111" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">6</text>
+<text x="939.3333333333333" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">7</text>
+<text x="986.5555555555555" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">8</text>
+<text x="1033.7777777777778" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">9</text>
+<text x="1081.0" y="315" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">10</text>
+<text x="797.5" y="338" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">Conexões simultâneas (N)</text>
+<circle cx="660.0" cy="256.98254031265674" r="3.5" fill="#d97706"/>
+<line x1="660.0" y1="256.98254031265674" x2="707.2222222222222" y2="230.2243206540603" stroke="#d97706" stroke-width="2"/>
+<circle cx="707.2222222222222" cy="230.2243206540603" r="3.5" fill="#d97706"/>
+<line x1="707.2222222222222" y1="230.2243206540603" x2="754.4444444444445" y2="210.83827709294712" stroke="#d97706" stroke-width="2"/>
+<circle cx="754.4444444444445" cy="210.83827709294712" r="3.5" fill="#d97706"/>
+<line x1="754.4444444444445" y1="210.83827709294712" x2="801.6666666666666" y2="204.35036775439363" stroke="#d97706" stroke-width="2"/>
+<circle cx="801.6666666666666" cy="204.35036775439363" r="3.5" fill="#d97706"/>
+<line x1="801.6666666666666" y1="204.35036775439363" x2="848.8888888888889" y2="186.27134895064495" stroke="#d97706" stroke-width="2"/>
+<circle cx="848.8888888888889" cy="186.27134895064495" r="3.5" fill="#d97706"/>
+<line x1="848.8888888888889" y1="186.27134895064495" x2="896.1111111111111" y2="171.67196754186799" stroke="#d97706" stroke-width="2"/>
+<circle cx="896.1111111111111" cy="171.67196754186799" r="3.5" fill="#d97706"/>
+<line x1="896.1111111111111" y1="171.67196754186799" x2="943.3333333333333" y2="161.80298981994068" stroke="#d97706" stroke-width="2"/>
+<circle cx="943.3333333333333" cy="161.80298981994068" r="3.5" fill="#d97706"/>
+<line x1="943.3333333333333" y1="161.80298981994068" x2="990.5555555555555" y2="152.14285714285714" stroke="#d97706" stroke-width="2"/>
+<circle cx="990.5555555555555" cy="152.14285714285714" r="3.5" fill="#d97706"/>
+<line x1="990.5555555555555" y1="152.14285714285714" x2="1037.7777777777778" y2="154.19117696610212" stroke="#d97706" stroke-width="2"/>
+<circle cx="1037.7777777777778" cy="154.19117696610212" r="3.5" fill="#d97706"/>
+<line x1="1037.7777777777778" y1="154.19117696610212" x2="1085.0" y2="157.29272134950122" stroke="#d97706" stroke-width="2"/>
+<circle cx="1085.0" cy="157.29272134950122" r="3.5" fill="#d97706"/>
+<text x="110" y="362" font-family="Arial,sans-serif" font-size="16" fill="#0f172a">Cabo ANVS14 → D15-126</text>
+<text x="110" y="383" font-family="Arial,sans-serif" font-size="12" fill="#475569">Mbps — escala própria</text>
+<line x1="110" y1="555.0" x2="535" y2="555.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="40" y="559.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">0.00</text>
+<line x1="110" y1="515.0" x2="535" y2="515.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="40" y="519.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">263.66</text>
+<line x1="110" y1="475.0" x2="535" y2="475.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="40" y="479.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">527.31</text>
+<line x1="110" y1="435.0" x2="535" y2="435.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="40" y="439.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">790.97</text>
+<line x1="110" y1="395.0" x2="535" y2="395.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="40" y="399.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">1 054.63</text>
+<text x="106.0" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">1</text>
+<text x="153.22222222222223" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">2</text>
+<text x="200.44444444444446" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">3</text>
+<text x="247.66666666666666" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">4</text>
+<text x="294.8888888888889" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">5</text>
+<text x="342.1111111111111" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">6</text>
+<text x="389.3333333333333" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">7</text>
+<text x="436.55555555555554" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">8</text>
+<text x="483.77777777777777" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">9</text>
+<text x="531.0" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">10</text>
+<text x="247.5" y="598" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">Conexões simultâneas (N)</text>
+<circle cx="110.0" cy="523.2090781790239" r="3.5" fill="#15803d"/>
+<line x1="110.0" y1="523.2090781790239" x2="157.22222222222223" y2="494.24319682738593" stroke="#15803d" stroke-width="2"/>
+<circle cx="157.22222222222223" cy="494.24319682738593" r="3.5" fill="#15803d"/>
+<line x1="157.22222222222223" y1="494.24319682738593" x2="204.44444444444446" y2="436.97365965703847" stroke="#15803d" stroke-width="2"/>
+<circle cx="204.44444444444446" cy="436.97365965703847" r="3.5" fill="#15803d"/>
+<line x1="204.44444444444446" y1="436.97365965703847" x2="251.66666666666666" y2="412.29942455407877" stroke="#15803d" stroke-width="2"/>
+<circle cx="251.66666666666666" cy="412.29942455407877" r="3.5" fill="#15803d"/>
+<line x1="251.66666666666666" y1="412.29942455407877" x2="298.8888888888889" y2="412.1948945673232" stroke="#15803d" stroke-width="2"/>
+<circle cx="298.8888888888889" cy="412.1948945673232" r="3.5" fill="#15803d"/>
+<line x1="298.8888888888889" y1="412.1948945673232" x2="346.1111111111111" y2="412.168344860963" stroke="#15803d" stroke-width="2"/>
+<circle cx="346.1111111111111" cy="412.168344860963" r="3.5" fill="#15803d"/>
+<line x1="346.1111111111111" y1="412.168344860963" x2="393.3333333333333" y2="412.21749974588136" stroke="#15803d" stroke-width="2"/>
+<circle cx="393.3333333333333" cy="412.21749974588136" r="3.5" fill="#15803d"/>
+<line x1="393.3333333333333" y1="412.21749974588136" x2="440.55555555555554" y2="412.14285714285717" stroke="#15803d" stroke-width="2"/>
+<circle cx="440.55555555555554" cy="412.14285714285717" r="3.5" fill="#15803d"/>
+<line x1="440.55555555555554" y1="412.14285714285717" x2="487.77777777777777" y2="412.21097610374716" stroke="#15803d" stroke-width="2"/>
+<circle cx="487.77777777777777" cy="412.21097610374716" r="3.5" fill="#15803d"/>
+<line x1="487.77777777777777" y1="412.21097610374716" x2="535.0" y2="412.23282271926644" stroke="#15803d" stroke-width="2"/>
+<circle cx="535.0" cy="412.23282271926644" r="3.5" fill="#15803d"/>
+<text x="660" y="362" font-family="Arial,sans-serif" font-size="16" fill="#0f172a">Wi-Fi ANVS14 → D15-126</text>
+<text x="660" y="383" font-family="Arial,sans-serif" font-size="12" fill="#475569">Mbps — escala própria</text>
+<line x1="660" y1="555.0" x2="1085" y2="555.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="590" y="559.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">0.00</text>
+<line x1="660" y1="515.0" x2="1085" y2="515.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="590" y="519.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">25.65</text>
+<line x1="660" y1="475.0" x2="1085" y2="475.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="590" y="479.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">51.31</text>
+<line x1="660" y1="435.0" x2="1085" y2="435.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="590" y="439.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">76.96</text>
+<line x1="660" y1="395.0" x2="1085" y2="395.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="590" y="399.0" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">102.61</text>
+<text x="656.0" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">1</text>
+<text x="703.2222222222222" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">2</text>
+<text x="750.4444444444445" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">3</text>
+<text x="797.6666666666666" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">4</text>
+<text x="844.8888888888889" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">5</text>
+<text x="892.1111111111111" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">6</text>
+<text x="939.3333333333333" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">7</text>
+<text x="986.5555555555555" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">8</text>
+<text x="1033.7777777777778" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">9</text>
+<text x="1081.0" y="575" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">10</text>
+<text x="797.5" y="598" font-family="Arial,sans-serif" font-size="12" fill="#0f172a">Conexões simultâneas (N)</text>
+<circle cx="660.0" cy="424.828795958462" r="3.5" fill="#be185d"/>
+<line x1="660.0" y1="424.828795958462" x2="707.2222222222222" y2="420.72488851467244" stroke="#be185d" stroke-width="2"/>
+<circle cx="707.2222222222222" cy="420.72488851467244" r="3.5" fill="#be185d"/>
+<line x1="707.2222222222222" y1="420.72488851467244" x2="754.4444444444445" y2="415.1256743692893" stroke="#be185d" stroke-width="2"/>
+<circle cx="754.4444444444445" cy="415.1256743692893" r="3.5" fill="#be185d"/>
+<line x1="754.4444444444445" y1="415.1256743692893" x2="801.6666666666666" y2="430.0834190912776" stroke="#be185d" stroke-width="2"/>
+<circle cx="801.6666666666666" cy="430.0834190912776" r="3.5" fill="#be185d"/>
+<line x1="801.6666666666666" y1="430.0834190912776" x2="848.8888888888889" y2="445.21579817257617" stroke="#be185d" stroke-width="2"/>
+<circle cx="848.8888888888889" cy="445.21579817257617" r="3.5" fill="#be185d"/>
+<line x1="848.8888888888889" y1="445.21579817257617" x2="896.1111111111111" y2="433.21436367605327" stroke="#be185d" stroke-width="2"/>
+<circle cx="896.1111111111111" cy="433.21436367605327" r="3.5" fill="#be185d"/>
+<line x1="896.1111111111111" y1="433.21436367605327" x2="943.3333333333333" y2="419.5757320609973" stroke="#be185d" stroke-width="2"/>
+<circle cx="943.3333333333333" cy="419.5757320609973" r="3.5" fill="#be185d"/>
+<line x1="943.3333333333333" y1="419.5757320609973" x2="990.5555555555555" y2="424.06944834253284" stroke="#be185d" stroke-width="2"/>
+<circle cx="990.5555555555555" cy="424.06944834253284" r="3.5" fill="#be185d"/>
+<line x1="990.5555555555555" y1="424.06944834253284" x2="1037.7777777777778" y2="412.14285714285717" stroke="#be185d" stroke-width="2"/>
+<circle cx="1037.7777777777778" cy="412.14285714285717" r="3.5" fill="#be185d"/>
+<line x1="1037.7777777777778" y1="412.14285714285717" x2="1085.0" y2="430.04599744285406" stroke="#be185d" stroke-width="2"/>
+<circle cx="1085.0" cy="430.04599744285406" r="3.5" fill="#be185d"/>
+<line x1="60" y1="656" x2="85" y2="656" stroke="#2563eb" stroke-width="3"/>
+<text x="94" y="660" font-family="Arial,sans-serif" font-size="13" fill="#0f172a">Loopback D15-126</text>
+<line x1="590" y1="656" x2="615" y2="656" stroke="#d97706" stroke-width="3"/>
+<text x="624" y="660" font-family="Arial,sans-serif" font-size="13" fill="#0f172a">Loopback ANVS14</text>
+<line x1="60" y1="679" x2="85" y2="679" stroke="#15803d" stroke-width="3"/>
+<text x="94" y="683" font-family="Arial,sans-serif" font-size="13" fill="#0f172a">Cabo ANVS14 → D15-126</text>
+<line x1="590" y1="679" x2="615" y2="679" stroke="#be185d" stroke-width="3"/>
+<text x="624" y="683" font-family="Arial,sans-serif" font-size="13" fill="#0f172a">Wi-Fi ANVS14 → D15-126</text>
+</svg>

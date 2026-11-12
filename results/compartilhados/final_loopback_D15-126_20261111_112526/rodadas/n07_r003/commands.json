@@ -1,0 +1,30 @@
+{
+  "server": [
+    "/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/build/chat_server",
+    "-p",
+    "5000",
+    "-n",
+    "7",
+    "-d",
+    "30",
+    "-w",
+    "5",
+    "-c",
+    "5",
+    "-r",
+    "3",
+    "-l",
+    "loopback",
+    "-o",
+    "/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_loopback_D15-126_20261111_112526/rodadas/n07_r003/results.csv",
+    "-s",
+    "/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/results/compartilhados/final_loopback_D15-126_20261111_112526/rodadas/n07_r003/samples.csv"
+  ],
+  "client": [
+    "/mnt/c/Users/Estevan/Documents/repos/tcp-throughput-chat/build/chat_client",
+    "127.0.0.1",
+    "5000",
+    "30",
+    "7"
+  ]
+}

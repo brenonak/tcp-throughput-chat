@@ -1,0 +1,32 @@
+{
+    "collected_at_utc":  "2026-11-11T14:17:30.2492105Z",
+    "ethernet":  {
+                     "Name":  "Ethernet 2",
+                     "InterfaceDescription":  "Realtek USB GbE Family Controller #2",
+                     "Status":  "Up",
+                     "LinkSpeed":  "1 Gbps",
+                     "MacAddress":  "D4-3A-65-16-76-FC",
+                     "ifIndex":  40
+                 },
+    "ipv4":  [
+                 {
+                     "IPAddress":  "192.168.50.2",
+                     "PrefixLength":  24,
+                     "AddressState":  4
+                 }
+             ],
+    "route_to_server":  [
+                            {
+                                "IPAddress":  "192.168.50.2",
+                                "DestinationPrefix":  null,
+                                "InterfaceAlias":  "Ethernet 2",
+                                "NextHop":  null
+                            },
+                            {
+                                "IPAddress":  null,
+                                "DestinationPrefix":  "192.168.50.0/24",
+                                "InterfaceAlias":  "Ethernet 2",
+                                "NextHop":  "0.0.0.0"
+                            }
+                        ]
+}

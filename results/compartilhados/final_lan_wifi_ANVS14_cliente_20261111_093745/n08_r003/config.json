@@ -1,0 +1,59 @@
+{
+  "mode": "client",
+  "ip": "192.168.15.10",
+  "label": "lan_wifi",
+  "port": 5000,
+  "duration": 30,
+  "repetitions": 5,
+  "clients": [
+    8
+  ],
+  "warmup": 5,
+  "cooldown": 5,
+  "interval": 5,
+  "rep": 3,
+  "output": "/mnt/c/Users/navet/OneDrive/Estvn/Documentos/repos/tcp-throughput-chat/results/compartilhados/lan_wifi_ANVS14_cliente_20261111_093745/n08_r003",
+  "interface": "eth0",
+  "no_monitor": false,
+  "machine_id": "ANVS14",
+  "client_machine_id": "ANVS14",
+  "server_machine_id": "D15-126",
+  "block_bytes": 65536,
+  "sample_timing": "monotonic",
+  "machine": {
+    "id": "ANVS14",
+    "hostname": "ANVS14",
+    "system": "Linux",
+    "release": "6.6.87.2-microsoft-standard-WSL2",
+    "architecture": "x86_64"
+  },
+  "compile_flags": "-O2 -Wall -Wextra -pthread",
+  "created_at": "2026-11-11T13:05:04.788140+00:00",
+  "monitoring": {
+    "enabled": true,
+    "interval_s": 1,
+    "interface": "eth0"
+  },
+  "order": [
+    {
+      "n_clients": 8,
+      "rep": 1
+    },
+    {
+      "n_clients": 8,
+      "rep": 2
+    },
+    {
+      "n_clients": 8,
+      "rep": 3
+    },
+    {
+      "n_clients": 8,
+      "rep": 4
+    },
+    {
+      "n_clients": 8,
+      "rep": 5
+    }
+  ]
+}

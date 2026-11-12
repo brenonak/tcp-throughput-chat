@@ -1,0 +1,3 @@
+n_clients,rep,started_at,finished_at,status,reason,server_machine_id,client_machine_id
+1,1,2026-11-11T12:27:29.864612+00:00,2026-11-11T12:28:35.383896+00:00,valid,,D15-126,ANVS14
+10,1,2026-11-11T12:28:40.404997+00:00,2026-11-11T12:29:41.657677+00:00,valid,,D15-126,ANVS14

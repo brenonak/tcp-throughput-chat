@@ -49,8 +49,9 @@ static struct timespec g_t_start;
 
 /* Snapshot por segundo: samples[tick][i] = bytes do cliente i no tick. */
 static uint64_t g_samples[MAX_SAMPLES][MAX_CLIENTS];
+static double g_sample_elapsed[MAX_SAMPLES];
 static int g_samples_count = 0;
-static volatile sig_atomic_t g_measurement_active = 0;
+static _Atomic int g_measurement_active = 0;
 
 static void logmsg(const char *fmt, ...) {
     if (g_quiet) return;
@@ -72,16 +73,15 @@ static ssize_t read_line(int fd, char *buffer, size_t capacity) {
     while (pos < capacity - 1) {
         char c;
         ssize_t n = recv(fd, &c, 1, 0);
-        if (n == 0) return pos == 0 ? 0 : (ssize_t)pos;
+        if (n == 0) return -1;
         if (n == -1) {
             if (errno == EINTR) continue;
             return -1;
         }
-        if (c == '\n') break;
+        if (c == '\n') { buffer[pos] = '\0'; return (ssize_t)pos; }
         if (c != '\r') buffer[pos++] = c;
     }
-    buffer[pos] = '\0';
-    return (ssize_t)pos;
+    return -1; /* Nome longo ou sem terminador. */
 }
 
 /* Diferenca em segundos entre dois clocks monotonic. */
@@ -104,7 +104,7 @@ static void *handle_client(void *arg) {
     if (!buf) {
         fprintf(stderr, "[server] malloc recv_buf: %s\n", strerror(errno));
         close(c->fd);
-        return NULL;
+        exit(EXIT_FAILURE);
     }
 
     /* Fase 1: le o nome do cliente. */
@@ -113,7 +113,7 @@ static void *handle_client(void *arg) {
         logmsg("[server] cliente fechou antes de enviar o nome\n");
         free(buf);
         close(c->fd);
-        return NULL;
+        exit(EXIT_FAILURE);
     }
     snprintf(c->name, sizeof(c->name), "%s", name_buf);
 
@@ -128,6 +128,7 @@ static void *handle_client(void *arg) {
            c->index + 1, g_n_expected, c->name);
 
     /* Fase 2: barreira de sincronizacao com main e as outras threads. */
+    pthread_barrier_wait(&g_start_barrier);
     pthread_barrier_wait(&g_start_barrier);
 
     /*
@@ -145,7 +146,7 @@ static void *handle_client(void *arg) {
             if (errno == EINTR) continue;
             fprintf(stderr, "[server] recv erro em %s: %s\n",
                     c->name, strerror(errno));
-            break;
+            exit(EXIT_FAILURE);
         }
         atomic_fetch_add_explicit(&c->bytes_received,
                                   (uint64_t)r,
@@ -170,8 +171,9 @@ static void *sampler(void *arg) {
 
     while (g_samples_count < MAX_SAMPLES) {
         target.tv_sec += 1;
-        int rc = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME,
-                                 &target, NULL);
+        int rc;
+        do { rc = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &target, NULL); }
+        while (rc == EINTR);
         if (rc != 0 && rc != EINTR) break;
 
         /* Checa a flag DEPOIS do sleep: se a medicao terminou enquanto
@@ -184,6 +186,9 @@ static void *sampler(void *arg) {
                 &g_clients[i]->bytes_received,
                 memory_order_relaxed);
         }
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        g_sample_elapsed[tick] = tdiff(&g_t_start, &now);
         g_samples_count++;
     }
     return NULL;
@@ -224,7 +229,7 @@ static void write_summary(double total_s, double window_s,
     strftime(ts, sizeof(ts), "%Y-%m-%dT%H:%M:%S", &tm);
 
     fprintf(f,
-        "%s,%s,%d,%d,%d,%.3f,%" PRIu64 ",%" PRIu64 ",%.3f,%.3f,%.3f\n",
+        "%s,%s,%d,%d,%d,%.3f,%" PRIu64 ",%" PRIu64 ",%.9f,%.3f,%.3f\n",
         ts, g_label, g_rep_id, g_n_expected, g_block_bytes,
         total_s, bytes_total, bytes_window, window_s,
         mbps_total, mbps_window);
@@ -242,7 +247,7 @@ static void write_samples(void) {
      */
     ensure_header(g_samples_path,
         "timestamp,label,rep,n_clients,tick_s,client_index,client_name,"
-        "bytes_cumulative");
+        "bytes_cumulative,elapsed_s");
 
     FILE *f = fopen(g_samples_path, "a");
     if (!f) {
@@ -260,10 +265,10 @@ static void write_samples(void) {
     for (int t = 0; t < g_samples_count; t++) {
         for (int i = 0; i < g_num_registered; i++) {
             fprintf(f,
-                "%s,%s,%d,%d,%d,%d,%s,%" PRIu64 "\n",
+                "%s,%s,%d,%d,%d,%d,%s,%" PRIu64 ",%.9f\n",
                 ts, g_label, g_rep_id, g_n_expected,
                 t + 1, i, g_clients[i]->name,
-                g_samples[t][i]);
+                g_samples[t][i], g_sample_elapsed[t]);
         }
     }
 
@@ -301,7 +306,7 @@ static void compute_and_report(const struct timespec *t_end) {
      *
      * Convencoes:
      *   samples[k][i] = bytes do cliente i registrados na amostra k+1,
-     *                   ou seja, imediatamente apos o segundo (k+1) da medicao.
+     *                   com instante real em g_sample_elapsed[k].
      *   samples_at(0) = 0 (nada enviado ainda em t=0).
      *   samples_at(t) = samples[t-1] para t >= 1, saturando no ultimo tick.
      *
@@ -325,7 +330,8 @@ static void compute_and_report(const struct timespec *t_end) {
                 uint64_t b = g_samples[end_s - 1][i];
                 bytes_window += (b - a);
             }
-            window_s = (double)(end_s - start_s);
+            window_s = g_sample_elapsed[end_s - 1]
+                     - (start_s > 0 ? g_sample_elapsed[start_s - 1] : 0.0);
         }
     }
 
@@ -396,7 +402,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (port <= 0 || g_n_expected <= 0 || g_duration_s <= 0 ||
+    if (port <= 0 || port > 65535 || g_warmup_s < 0 || g_cooldown_s < 0 ||
+        g_duration_s > MAX_SAMPLES || g_duration_s <= g_warmup_s + g_cooldown_s + 1 ||
+        strpbrk(g_label, ",\r\n") || g_n_expected <= 0 || g_duration_s <= 0 ||
         g_n_expected > MAX_CLIENTS) {
         usage(argv[0]);
         return EXIT_FAILURE;
@@ -460,7 +468,7 @@ int main(int argc, char *argv[]) {
         if (!c) {
             perror("calloc");
             close(cfd);
-            continue;
+            return EXIT_FAILURE;
         }
         c->fd = cfd;
         atomic_init(&c->bytes_received, 0);
@@ -475,33 +483,26 @@ int main(int argc, char *argv[]) {
 
     logmsg("[server] todas as conexoes aceitas, aguardando nomes...\n");
 
-    /*
-     * Espera as N threads chegarem na barreira (todas leram o nome e
-     * entraram no laco de recv). Depois marca t0.
-     *
-     * Protocolo simplificado (sem handshake "GO\n"): o cliente comeca a
-     * transmitir imediatamente depois de enviar o nome. Pode acontecer
-     * de um cliente (que conectou primeiro) ja ter bytes enfileirados no
-     * buffer do kernel antes de t0. Esses bytes serao contados no laco
-     * de recv() apos t0, o que superestima levemente o "mbps_total".
-     *
-     * Isso nao afeta o "mbps_window", que usa a diferenca entre amostras
-     * cumulativas tomadas em t=warmup e t=duracao-cooldown. Com warmup
-     * de 5 s, qualquer skew inicial eh absorvido.
-     */
+    /* Primeira barreira confirma registro; segunda libera recv apos t0. */
     pthread_barrier_wait(&g_start_barrier);
-
     clock_gettime(CLOCK_MONOTONIC, &g_t_start);
     g_measurement_active = 1;
-
-    logmsg("[server] todos os clientes prontos, medicao iniciada "
-           "(duracao combinada: %d s).\n", g_duration_s);
-
-    /* Dispara amostradora. */
     pthread_t sampler_tid;
     if (pthread_create(&sampler_tid, NULL, sampler, NULL) != 0) {
-        fprintf(stderr, "[server] pthread_create sampler falhou\n");
+        fprintf(stderr, "Falha ao iniciar amostradora.\n");
+        return EXIT_FAILURE;
     }
+    pthread_barrier_wait(&g_start_barrier);
+    for (int i = 0; i < g_num_registered; i++) {
+        size_t sent = 0;
+        while (sent < 3) {
+            ssize_t n = send(g_clients[i]->fd, "GO\n" + sent, 3 - sent, MSG_NOSIGNAL);
+            if (n < 0 && errno == EINTR) continue;
+            if (n <= 0) { perror("send GO"); return EXIT_FAILURE; }
+            sent += (size_t)n;
+        }
+    }
+    logmsg("[server] START medicao iniciada\n");
 
     /* Espera todas as threads de cliente terminarem. */
     for (int i = 0; i < g_num_registered; i++) {
