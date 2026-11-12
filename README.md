@@ -8,7 +8,7 @@ Experimentos de vazão agregada recebida por um servidor TCP com 1 a 10 conexõe
 - `src/`: versão instrumentada do servidor e do cliente para geração de carga, sincronização de início e medição de vazão.
 - `scripts/`: automação das campanhas (`run_experiments.sh`, `experiments.py`), validação de rodadas (`metrics.py`), monitoramento de CPU e rede (`monitoring.py`), coleta de ambiente (`coleta_ambiente.sh`) e geração de estatísticas e gráficos (`analyze.py`).
 - `tests/`: testes automatizados do protocolo de sincronização, validação de amostras e cálculo de métricas.
-- `docs/`: relatório técnico no formato SBC (`sbc-template.tex`, `sbc-template.pdf` e figuras em `docs/figs/`). Os artefatos temporários de compilação do LaTeX (`.aux`, `.bbl`, `.blg`, `.fdb_latexmk`, `.fls`, `.log`, `.synctex.gz`, entre outros) são ignorados pelo `.gitignore`.
+- `docs/`: relatório técnico no formato SBC (`relatorio_tcp_168765_168826_169251.tex`, `relatorio_tcp_168765_168826_169251.pdf` e figuras em `docs/figs/`). Os artefatos temporários de compilação do LaTeX (`.aux`, `.bbl`, `.blg`, `.fdb_latexmk`, `.fls`, `.log`, `.synctex.gz`, entre outros) são ignorados pelo `.gitignore`.
 - `results/compartilhados/`: campanhas experimentais validadas (`loopback`, `lan_cabo` e `lan_wifi`), comparativos consolidados e painel completo de análises (`analises_completas_20261111/`).
 
 ## Preparação no Ubuntu ou WSL
@@ -134,4 +134,4 @@ Os experimentos finais foram conduzidos entre as máquinas `D15-126` (servidor, 
 - **Rede local sem fio (Wi-Fi):** a vazão agregada média permaneceu entre **61,2 e 81,4 Mbps** (máximo de 91,6 Mbps em $N=9$), sem ganho sistemático com o aumento de clientes, pois o meio sem fio compartilhado já estava saturado desde $N=1$.
 - **Loopback (`D15-126`):** sem limitação de enlace físico de rede, a vazão agregada atingiu média de **176,3 Gbps** (máximo de 180,8 Gbps) com $N=5$ clientes e reduziu-se para 143,4 Gbps em $N=10$ devido à contenção de processador, trocas de contexto e compartilhamento de núcleos entre as *threads* de cliente e servidor na mesma máquina.
 
-O relatório completo com a descrição da arquitetura, metodologia, resultados e discussões encontra-se em `docs/sbc-template.tex` (`docs/sbc-template.pdf`).
+O relatório completo com a descrição da arquitetura, metodologia, resultados e discussões encontra-se em `docs/relatorio_tcp_168765_168826_169251.tex` (`docs/relatorio_tcp_168765_168826_169251.pdf`).
