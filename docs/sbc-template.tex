@@ -7,6 +7,7 @@
 \usepackage[brazil]{babel}
 \usepackage{enumitem}
 \usepackage{placeins}
+\usepackage{float}
 
 % Defina aqui a hifenização de palavras que o LaTeX quebra errado
 % (ex.: \hyphenation{com-pu-ta-ção al-go-rit-mo})
@@ -265,12 +266,14 @@ indicam a estabilidade das medições.
 A Tabela~\ref{tab:resultados} apresenta a taxa de transmissão agregada máxima e
 média obtida em cada cenário para 1 a 10 clientes simultâneos, enquanto a
 Figura~\ref{fig:maximo} mostra a taxa máxima em escala logarítmica, necessária
-porque os cenários diferem em várias ordens de grandeza. De modo geral, o
-comportamento observado dependeu menos do servidor e mais do recurso que
+porque os cenários diferem em várias ordens de grandeza. Complementarmente, a
+Figura~\ref{fig:medias} apresenta a taxa média de cada cenário em sua própria
+escala, e a Figura~\ref{fig:conexao} mostra a taxa obtida por cada conexão
+individualmente. De modo geral, o comportamento observado dependeu menos do servidor e mais do recurso que
 limitava a transmissão em cada cenário, isto é, o enlace Ethernet,
 o meio sem fio no cenário Wi-Fi e o processador no \textit{loopback}.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Taxa de transmissão agregada máxima e média, em Mbps, por número de
 clientes simultâneos ($N$).}
@@ -295,7 +298,7 @@ $N$ & Máx. & Média & Máx. & Média & Máx. & Média \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[ht]
+\begin{figure}[htp]
 \centering
 \includegraphics[width=\textwidth]{figs/comparacao_maximo_log.png}
 \caption{Taxa de transmissão agregada máxima em função do número de clientes
@@ -303,13 +306,31 @@ nos três cenários, em escala logarítmica.}
 \label{fig:maximo}
 \end{figure}
 
+\begin{figure}[htp]
+\centering
+\includegraphics[width=\textwidth]{figs/medias_cenarios.png}
+\caption{Taxa de transmissão agregada média em cada cenário, com intervalo de
+confiança de 95\%. Cada painel possui sua própria escala.}
+\label{fig:medias}
+\end{figure}
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=\textwidth]{figs/conexao_cenarios.png}
+\caption{Taxa de transmissão de cada conexão em todas as repetições, em cada
+cenário.}
+\label{fig:conexao}
+\end{figure}
+
+\newpage
+
 \subsection{Rede local cabeada (Ethernet)}
 
 No cenário Ethernet, a taxa agregada cresceu de forma aproximadamente proporcional
 ao número de clientes até três conexões, passando de cerca de 203~Mbps para
 744~Mbps em média. A partir de quatro clientes, contudo, a taxa estabilizou em
 torno de 941~Mbps, com variação inferior a 2~Mbps entre as repetições, como
-mostra a Figura~\ref{fig:lan}. Esse valor coincide com o limite teórico de
+mostra a Figura~\ref{fig:medias}(b). Esse valor coincide com o limite teórico de
 vazão útil do TCP em um enlace Gigabit Ethernet. Isso ocorre porque, embora o
 enlace transmita 1~Gbps, parte de cada quadro é ocupada pelos cabeçalhos
 Ethernet, IP e TCP e pelo intervalo obrigatório entre quadros, de modo que, com
@@ -318,16 +339,9 @@ são dados da aplicação, o que corresponde a aproximadamente 941~Mbps.
 Portanto, a partir de quatro clientes, o gargalo passou a ser o próprio enlace
 físico.
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=.8\textwidth]{figs/comparacao_lan_media.png}
-\caption{Taxa de transmissão agregada média nos cenários Ethernet e Wi-Fi, com
-intervalo de confiança de 95\%.}
-\label{fig:lan}
-\end{figure}
-
 Por outro lado, com poucos clientes, cada conexão alcançou apenas cerca de 200
-a 250~Mbps, bem abaixo da capacidade do enlace. Como os \textit{buffers} TCP
+a 250~Mbps, bem abaixo da capacidade do enlace, como mostra a
+Figura~\ref{fig:conexao}(b). Como os \textit{buffers} TCP
 das máquinas são grandes em relação ao baixo atraso de uma rede local, é pouco
 provável que esse limite se deva ao controle de fluxo do TCP. A explicação mais
 provável é o encaminhamento entre o Windows e o WSL, que possivelmente processa
@@ -349,8 +363,10 @@ transmitem e recebem ao mesmo tempo, e a taxa efetiva depende da qualidade do
 sinal, de interferências e de retransmissões, o que resulta em uma capacidade
 bem inferior à nominal. Por esse motivo, os resultados também foram os mais
 variáveis entre as repetições, como indicam os amplos intervalos de confiança
-da Figura~\ref{fig:lan}, e a divisão da banda entre as conexões foi a mais
-desigual entre os três cenários.
+da Figura~\ref{fig:medias}(c). Além disso, a taxa de cada conexão diminuiu à
+medida que a mesma banda foi dividida entre mais clientes, e essa divisão foi a
+mais desigual entre os três cenários, como mostra a
+Figura~\ref{fig:conexao}(c).
 
 Observou-se ainda que, em parte das rodadas, a janela de medição se estendeu
 por 21 a 26 segundos, em vez de 20. Isso ocorreu porque ainda havia dados em
@@ -369,7 +385,10 @@ clientes. Até três clientes, a taxa cresceu de forma praticamente linear, com
 cerca de 49~Gbps por conexão, o que indica que cada conexão dispunha de
 recursos de processamento suficientes. A partir de quatro clientes, contudo, o
 ganho diminuiu e, após cinco clientes, a taxa passou a cair, chegando a
-143,4~Gbps com dez clientes.
+143,4~Gbps com dez clientes, como mostra a Figura~\ref{fig:medias}(a). Ao
+mesmo tempo, a taxa de cada conexão diminuiu de forma regular e homogênea, como
+se observa na Figura~\ref{fig:conexao}(a), o que indica que os recursos foram
+divididos igualmente entre as conexões.
 
 Esse comportamento é explicado pela disputa pelo processador. Como cliente e
 servidor executam na mesma máquina, cada conexão ocupa duas \textit{threads}
